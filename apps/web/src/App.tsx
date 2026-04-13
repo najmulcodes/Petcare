@@ -4,7 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 
-import HomePage from "./pages/home/HomePage";
+import { HomePage } from "./pages/home/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { PetsListPage } from "./pages/pets/PetsListPage";
