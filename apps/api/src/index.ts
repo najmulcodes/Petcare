@@ -7,9 +7,11 @@ async function main() {
   await verifyEmailConnection();
   startNotificationJob();
 
-  const server = app.listen(env.PORT, () => {
-    console.log(`✅ API running on port ${env.PORT} [${env.NODE_ENV}]`);
-  });
+  const PORT = process.env.PORT || 4000;
+
+  app.listen(PORT, () => {
+  console.log(`API running on port ${PORT}`);
+});
 
   process.on("SIGTERM", () => {
     console.log("SIGTERM received. Shutting down gracefully...");

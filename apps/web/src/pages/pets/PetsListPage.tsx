@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { usePets, useDeletePet } from "../../hooks/usePets";
-import { Badge } from "../../components/ui/Badge";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { ErrorState } from "../../components/ui/ErrorState";
 

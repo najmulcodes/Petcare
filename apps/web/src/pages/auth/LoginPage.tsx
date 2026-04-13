@@ -22,37 +22,49 @@ export function LoginPage() {
       : await supabase.auth.signInWithPassword({ email, password });
 
     setLoading(false);
-    if (authError) { setError(authError.message); return; }
+
+    if (authError) {
+      setError(authError.message);
+      return;
+    }
 
     await requestNotificationPermission();
     notify("Welcome to Whisker Diary 🐾", "You're all set. Track your pets and expenses!");
+
     navigate("/dashboard");
   }
 
   async function handleGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin + "/dashboard" },
+      options: {
+        redirectTo: window.location.origin + "/dashboard",
+      },
     });
+
     if (error) setError(error.message);
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f6eee9] px-4">
-      {/* Back to Home */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f6eee9] px-4 relative">
+
+      {/* Back */}
       <Link
         to="/"
         className="absolute top-5 left-5 inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors"
       >
         <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
-          <path fillRule="evenodd" d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z" />
+          <path
+            fillRule="evenodd"
+            d="M9.78 12.78a.75.75 0 01-1.06 0L4.47 8.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L6.06 8l3.72 3.72a.75.75 0 010 1.06z"
+          />
         </svg>
-        Back
+        Back to home
       </Link>
 
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         {/* Header */}
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <div className="mb-3 text-5xl">🐾</div>
           <h1 className="text-2xl font-bold text-gray-900">Whisker Diary</h1>
           <p className="mt-1 text-sm text-gray-400">
@@ -63,6 +75,8 @@ export function LoginPage() {
         {/* Card */}
         <div className="rounded-3xl bg-white p-6 shadow-card">
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Email */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 Email
@@ -78,6 +92,7 @@ export function LoginPage() {
               />
             </div>
 
+            {/* Password */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 Password
@@ -93,15 +108,17 @@ export function LoginPage() {
               />
             </div>
 
+            {/* Error */}
             {error && <InlineError message={error} />}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
               className="w-full rounded-2xl py-3 text-sm font-semibold text-white transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               style={{
                 background: "#ff7a5c",
-                boxShadow: "0 4px 16px rgba(255,122,92,0.35)",
+                boxShadow: "0 6px 20px rgba(255,122,92,0.35)",
               }}
             >
               {loading ? "Loading…" : isSignUp ? "Create account" : "Sign in"}
@@ -109,7 +126,7 @@ export function LoginPage() {
           </form>
 
           {/* Divider */}
-          <div className="my-4 flex items-center gap-3">
+          <div className="my-5 flex items-center gap-3">
             <div className="h-px flex-1 bg-warm-100" />
             <span className="text-xs text-gray-300">or</span>
             <div className="h-px flex-1 bg-warm-100" />
@@ -130,12 +147,16 @@ export function LoginPage() {
             Continue with Google
           </button>
 
+          {/* Toggle */}
           <p className="mt-5 text-center text-sm text-gray-400">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
-              onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
-              className="font-semibold transition-colors"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
+              className="font-semibold"
               style={{ color: "#ff7a5c" }}
             >
               {isSignUp ? "Sign in" : "Sign up"}

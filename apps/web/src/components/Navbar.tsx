@@ -1,13 +1,10 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
-  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-
-  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 12);

@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usePets } from "../../hooks/usePets";
 import { useExpenses } from "../../hooks/useExpenses";
-import { Button } from "../../components/ui/Button";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { ErrorState } from "../../components/ui/ErrorState";
 
