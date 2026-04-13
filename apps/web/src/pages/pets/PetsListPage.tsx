@@ -57,7 +57,7 @@ export function PetsListPage() {
           </Link>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3">
           {pets.map((pet) => (
             <div key={pet.id} className="rounded-3xl bg-white p-5 shadow-soft">
               <div className="flex items-center gap-4">

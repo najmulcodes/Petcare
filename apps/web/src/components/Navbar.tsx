@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -7,115 +7,54 @@ export function Navbar() {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
 
+  const isHomePage = location.pathname === "/";
+
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 12);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const isHomePage = location.pathname === "/";
-
   return (
     <header
-      className="sticky top-0 z-30 transition-all duration-300"
+      className="fixed top-0 left-0 w-full z-50 transition-all duration-300"
       style={{
-        background: scrolled
-          ? isHomePage
-            ? "rgba(10,10,15,0.85)"
-            : "rgba(255,255,255,0.92)"
-          : "transparent",
+        background: scrolled ? "rgba(246,238,233,0.92)" : "transparent",
         backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled
-          ? isHomePage
-            ? "1px solid rgba(255,255,255,0.06)"
-            : "1px solid rgba(0,0,0,0.08)"
-          : "1px solid transparent",
+        borderBottom: scrolled ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
+        boxShadow: scrolled ? "0 2px 16px rgba(0,0,0,0.05)" : "none",
       }}
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
-        <Link
-          to="/"
-          className="flex items-center gap-2 font-bold"
-          style={{ color: isHomePage ? "rgba(255,255,255,0.9)" : "#5b21b6" }}
-        >
+      <div className="mx-auto flex h-14 w-full max-w-md items-center justify-between px-4 sm:max-w-2xl sm:px-6 lg:max-w-6xl lg:px-8">
+        <Link to="/" className="flex items-center gap-2 font-bold text-gray-800">
           <span className="text-xl">🐾</span>
-          <span className="hidden text-sm tracking-tight sm:inline">
-            Whisker Diary
-          </span>
+          <span className="text-sm tracking-tight">Whisker Diary</span>
         </Link>
 
         <nav className="flex items-center gap-1">
           {!user ? (
             <>
               <Link
-                to="/"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-                style={{
-                  color: isHomePage ? "rgba(255,255,255,0.45)" : "#6b7280",
-                }}
-              >
-                Home
-              </Link>
-              <Link
                 to="/login"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-                style={{
-                  color: isHomePage ? "rgba(255,255,255,0.45)" : "#6b7280",
-                }}
+                className="rounded-2xl px-4 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors"
               >
                 Login
               </Link>
               <Link
                 to="/login"
-                className="ml-1 rounded-lg px-4 py-1.5 text-sm font-semibold text-white transition-all hover:scale-[1.02]"
-                style={{
-                  background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                  boxShadow: "0 0 0 1px rgba(124,58,237,0.4)",
-                }}
+                className="rounded-2xl px-4 py-1.5 text-sm font-semibold text-white transition-all hover:scale-[1.02]"
+                style={{ background: "#ff7a5c" }}
               >
-                Register
+                Sign up
               </Link>
             </>
           ) : (
-            <>
-              <Link
-                to="/dashboard"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-                style={{
-                  color: isHomePage ? "rgba(255,255,255,0.75)" : "#4b5563",
-                }}
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/pets"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-                style={{
-                  color: isHomePage ? "rgba(255,255,255,0.75)" : "#4b5563",
-                }}
-              >
-                Pets
-              </Link>
-              <Link
-                to="/expenses"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-                style={{
-                  color: isHomePage ? "rgba(255,255,255,0.75)" : "#4b5563",
-                }}
-              >
-                Expenses
-              </Link>
-              <button
-                onClick={signOut}
-                className="ml-1 rounded-lg px-4 py-1.5 text-sm font-semibold text-white transition-all hover:scale-[1.02]"
-                style={{
-                  background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                  boxShadow: "0 0 0 1px rgba(124,58,237,0.4)",
-                }}
-              >
-                Logout
-              </button>
-            </>
+            <button
+              onClick={signOut}
+              className="rounded-2xl border border-warm-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-warm-50 transition-colors"
+            >
+              Sign out
+            </button>
           )}
         </nav>
       </div>

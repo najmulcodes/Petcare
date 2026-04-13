@@ -6,8 +6,6 @@ const baseURL = import.meta.env.VITE_API_URL
 
 export const api = axios.create({ baseURL });
 
-// The active access token is stored here by AuthContext when the session
-// changes. This avoids calling supabase.auth.getSession() on every request.
 let _accessToken: string | null = null;
 
 export function setAccessToken(token: string | null): void {
@@ -25,7 +23,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired — AuthContext listener will pick up the sign-out
       setAccessToken(null);
     }
     return Promise.reject(error);

@@ -28,7 +28,9 @@ export function DashboardPage() {
   const firstName = user?.email?.split("@")[0] ?? "there";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+      {/* Left column on desktop */}
+      <div className="space-y-4 lg:col-span-2">
       {/* Greeting */}
       <div
         className="rounded-3xl p-5 text-white"
@@ -55,7 +57,48 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Pets section */}
+      {/* Recent expenses */}
+      <div className="rounded-3xl bg-white p-5 shadow-soft">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-gray-900">💰 Recent Expenses</h2>
+          <Link to="/expenses/add">
+            <button
+              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-white"
+              style={{ background: "#ff7a5c" }}
+            >
+              + Add
+            </button>
+          </Link>
+        </div>
+
+        {recentExpenses.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-400">No expenses recorded this month.</p>
+        ) : (
+          <ul className="divide-y divide-[#f6eee9]">
+            {recentExpenses.map((expense) => (
+              <li key={expense.id} className="flex items-center justify-between py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{expense.description ?? "—"}</p>
+                  <p className="text-xs text-gray-400">{expense.category?.name ?? "Uncategorized"} · {expense.date}</p>
+                </div>
+                <span className="ml-3 flex-shrink-0 text-sm font-bold" style={{ color: "#ff7a5c" }}>
+                  {formatBDT(Number(expense.amount_bdt))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {recentExpenses.length > 0 && (
+          <Link to="/expenses" className="mt-3 block text-center text-xs font-medium" style={{ color: "#ff7a5c" }}>
+            View all expenses →
+          </Link>
+        )}
+      </div>
+      </div>
+
+      {/* Right column on desktop — Pets */}
+      <div className="space-y-4">
       <div className="rounded-3xl bg-white p-5 shadow-soft">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-bold text-gray-900">🐾 My Pets</h2>
@@ -83,62 +126,23 @@ export function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
             {pets.map((pet) => (
               <Link key={pet.id} to={`/pets/${pet.id}`}>
-                <div className="flex flex-col items-center rounded-2xl bg-[#fff4f1] p-4 text-center transition-all hover:shadow-soft">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-soft">
+                <div className="flex items-center gap-3 rounded-2xl bg-[#fff4f1] p-3 transition-all hover:shadow-soft lg:flex-row">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-soft">
                     🐶
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">{pet.name}</p>
-                  {pet.breed && <p className="text-xs text-gray-400">{pet.breed}</p>}
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{pet.name}</p>
+                    {pet.breed && <p className="text-xs text-gray-400 truncate">{pet.breed}</p>}
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         )}
       </div>
-
-      {/* Recent expenses */}
-      <div className="rounded-3xl bg-white p-5 shadow-soft">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-900">💰 Recent Expenses</h2>
-          <Link to="/expenses/add">
-            <button
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-white"
-              style={{ background: "#ff7a5c" }}
-            >
-              + Add
-            </button>
-          </Link>
-        </div>
-
-        {recentExpenses.length === 0 ? (
-          <p className="py-6 text-center text-sm text-gray-400">No expenses recorded this month.</p>
-        ) : (
-          <ul className="divide-y divide-warm-100">
-            {recentExpenses.map((expense) => (
-              <li key={expense.id} className="flex items-center justify-between py-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{expense.description ?? "—"}</p>
-                  <p className="text-xs text-gray-400">{expense.category?.name ?? "Uncategorized"} · {expense.date}</p>
-                </div>
-                <span
-                  className="ml-3 flex-shrink-0 text-sm font-bold"
-                  style={{ color: "#ff7a5c" }}
-                >
-                  {formatBDT(Number(expense.amount_bdt))}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {recentExpenses.length > 0 && (
-          <Link to="/expenses" className="mt-3 block text-center text-xs font-medium" style={{ color: "#ff7a5c" }}>
-            View all expenses →
-          </Link>
-        )}
       </div>
     </div>
   );
