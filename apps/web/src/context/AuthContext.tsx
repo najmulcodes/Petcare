@@ -24,24 +24,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Hydrate from existing session on mount
-    supabase.auth.getSession().then(({ data }) => {
+    // ✅ FIX: ensure session is read AFTER redirect hash processing
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
       const s = data.session ?? null;
+
       setSession(s);
       setUser(s?.user ?? null);
       setAccessToken(s?.access_token ?? null);
       setLoading(false);
-    });
+    };
 
-    // Keep token in sync with auth state changes (refresh, sign-out, sign-in)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      setAccessToken(s?.access_token ?? null);
-      setLoading(false);
-    });
+    init();
 
-    return () => listener.subscription.unsubscribe();
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, s) => {
+        setSession(s);
+        setUser(s?.user ?? null);
+        setAccessToken(s?.access_token ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   async function signOut() {
