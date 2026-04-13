@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -12,48 +12,30 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const isOnDarkPage = !user;
+
   return (
     <header
-      className="fixed top-0 left-0 w-full z-50 transition-all duration-300"
+      className="sticky top-0 z-30 transition-all duration-300"
       style={{
-        background: scrolled ? "rgba(246,238,233,0.92)" : "transparent",
+        background: scrolled
+          ? isOnDarkPage
+            ? "rgba(10,10,15,0.85)"
+            : "rgba(255,255,255,0.92)"
+          : "transparent",
         backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
-        boxShadow: scrolled ? "0 2px 16px rgba(0,0,0,0.05)" : "none",
       }}
     >
-      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-bold text-gray-800">
-          <span className="text-xl">🐾</span>
-          <span className="text-sm tracking-tight">Whisker Diary</span>
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
+        <Link to="/" className="flex items-center gap-2 font-bold">
+          🐾 Whisker Diary
         </Link>
 
-        <nav className="flex items-center gap-1">
-          {!user ? (
-            <>
-              <Link
-                to="/login"
-                className="rounded-2xl px-4 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors"
-              >
-                Login
-              </Link>
-              <Link
-                to="/login"
-                className="rounded-2xl px-4 py-1.5 text-sm font-semibold text-white transition-all hover:scale-[1.02]"
-                style={{ background: "#ff7a5c" }}
-              >
-                Sign up
-              </Link>
-            </>
-          ) : (
-            <button
-              onClick={signOut}
-              className="rounded-2xl border border-warm-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-600 hover:bg-warm-50 transition-colors"
-            >
-              Sign out
-            </button>
-          )}
-        </nav>
+        {!user ? (
+          <Link to="/login">Login</Link>
+        ) : (
+          <button onClick={signOut}>Logout</button>
+        )}
       </div>
     </header>
   );
