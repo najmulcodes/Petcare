@@ -4,7 +4,6 @@ import { usePet, useUpdatePet } from "../../hooks/usePets";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Button } from "../../components/ui/Button";
-import { Card } from "../../components/ui/Card";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { InlineError, ErrorState } from "../../components/ui/ErrorState";
 
@@ -57,12 +56,13 @@ export function EditPetPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
+    <div className="mx-auto max-w-lg space-y-5">
       <div className="flex items-center gap-3">
-        <Link to={`/pets/${id}`} className="text-sm text-gray-500 hover:text-gray-700">← Back</Link>
-        <h1 className="text-2xl font-bold text-gray-900">Edit {pet.name}</h1>
+        <Link to={`/pets/${id}`} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">← Back</Link>
+        <h1 className="text-xl font-bold text-gray-900">Edit {pet.name}</h1>
       </div>
-      <Card>
+
+      <div className="rounded-3xl bg-white p-6 shadow-soft">
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input label="Name *" value={form.name} onChange={(e) => set("name", e.target.value)} required />
           <Input label="Date of birth" type="date" value={form.dob} onChange={(e) => set("dob", e.target.value)} />
@@ -79,24 +79,33 @@ export function EditPetPage() {
               { value: "unknown", label: "Unknown" },
             ]}
           />
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Notes</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</label>
             <textarea
               value={form.notes}
               onChange={(e) => set("notes", e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-2xl border border-[#eeddd3] bg-[#f6eee9] px-4 py-3 text-sm text-gray-800 placeholder-gray-300 outline-none transition-all focus:border-[#ff7a5c] focus:ring-2 focus:ring-[#ff7a5c]/15 resize-none"
             />
           </div>
+
           {formError && <InlineError message={formError} />}
-          <div className="flex gap-3 pt-2">
+
+          <div className="flex gap-3 pt-1">
             <Link to={`/pets/${id}`} className="flex-1">
-              <Button variant="secondary" className="w-full">Cancel</Button>
+              <button
+                type="button"
+                className="w-full rounded-2xl border border-[#eeddd3] bg-[#f6eee9] py-3 text-sm font-semibold text-gray-600 hover:bg-[#eeddd3] transition-colors"
+              >
+                Cancel
+              </button>
             </Link>
-            <Button type="submit" loading={updatePet.isPending} className="flex-1">Save changes</Button>
+            <Button type="submit" loading={updatePet.isPending} className="flex-1">
+              Save changes
+            </Button>
           </div>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }

@@ -3,9 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
+import { useAuth } from "./context/AuthContext";
 
 import { HomePage } from "./pages/home/HomePage";
-import LoginPage from "./pages/auth/LoginPage";
+import { LoginPage } from "./pages/auth/LoginPage";
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
 import { PetsListPage } from "./pages/pets/PetsListPage";
 import { AddPetPage } from "./pages/pets/AddPetPage";
@@ -13,113 +14,53 @@ import { EditPetPage } from "./pages/pets/EditPetPage";
 import { PetDetailPage } from "./pages/pets/PetDetailPage";
 import { ExpensesListPage } from "./pages/expenses/ExpensesListPage";
 import { AddExpensePage } from "./pages/expenses/AddExpensePage";
+import { PageSpinner } from "./components/ui/Spinner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 1000 * 60,
-    },
+    queries: { retry: 1, staleTime: 60_000 },
   },
 });
+
+function AppPage({ children }: { children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <Layout appShell>{children}</Layout>
+    </ProtectedRoute>
+  );
+}
+
+// Redirect logged-in users away from public-only pages
+function PublicOnlyPage({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <PageSpinner />;
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <Layout>{children}</Layout>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<PublicOnlyPage><HomePage /></PublicOnlyPage>} />
+      <Route path="/login" element={<PublicOnlyPage><LoginPage /></PublicOnlyPage>} />
+      <Route path="/dashboard" element={<AppPage><DashboardPage /></AppPage>} />
+      <Route path="/pets" element={<AppPage><PetsListPage /></AppPage>} />
+      <Route path="/pets/add" element={<AppPage><AddPetPage /></AppPage>} />
+      <Route path="/pets/:id" element={<AppPage><PetDetailPage /></AppPage>} />
+      <Route path="/pets/:id/edit" element={<AppPage><EditPetPage /></AppPage>} />
+      <Route path="/expenses" element={<AppPage><ExpensesListPage /></AppPage>} />
+      <Route path="/expenses/add" element={<AppPage><AddExpensePage /></AppPage>} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+}
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Layout appShell={false}>
-                  <HomePage />
-                </Layout>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <Layout appShell={false}>
-                  <LoginPage />
-                </Layout>
-              }
-            />
-
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <DashboardPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pets"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <PetsListPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pets/add"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <AddPetPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pets/:id"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <PetDetailPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pets/:id/edit"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <EditPetPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/expenses"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <ExpensesListPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/expenses/add"
-              element={
-                <ProtectedRoute>
-                  <Layout appShell>
-                    <AddExpensePage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
