@@ -8,6 +8,7 @@ import {
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { setAccessToken } from "../lib/api";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextValue {
   user: User | null;
@@ -19,37 +20,52 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ FIX: ensure session is read AFTER redirect hash processing
-    const init = async () => {
-      const { data } = await supabase.auth.getSession();
+    // 🔹 Initial session load (important for refresh + OAuth return)
+    supabase.auth.getSession().then(({ data }) => {
       const s = data.session ?? null;
 
       setSession(s);
       setUser(s?.user ?? null);
       setAccessToken(s?.access_token ?? null);
       setLoading(false);
-    };
 
-    init();
+      // ✅ Redirect after OAuth / refresh
+      if (s?.user && window.location.pathname === "/login") {
+        navigate("/dashboard", { replace: true });
+      }
+    });
 
+    // 🔹 Listen to auth changes (login, logout, refresh)
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, s) => {
         setSession(s);
         setUser(s?.user ?? null);
         setAccessToken(s?.access_token ?? null);
         setLoading(false);
+
+        // ✅ Redirect after login (especially Google OAuth)
+        if (s?.user) {
+          navigate("/dashboard", { replace: true });
+        }
+
+        // ✅ Redirect after logout
+        if (!s?.user) {
+          navigate("/login", { replace: true });
+        }
       }
     );
 
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   async function signOut() {
     await supabase.auth.signOut();
