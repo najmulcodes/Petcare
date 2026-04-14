@@ -1,15 +1,7 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { env } from "../config/env";
 
-const transporter = nodemailer.createTransport({
-  host: env.EMAIL_HOST,
-  port: env.EMAIL_PORT,
-  secure: env.EMAIL_PORT === 465,
-  auth: {
-    user: env.EMAIL_USER,
-    pass: env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(env.RESEND_API_KEY);
 
 export interface ReminderEmailOptions {
   to: string;
@@ -36,7 +28,7 @@ function buildReminderHtml(opts: ReminderEmailOptions): string {
     .card { background: #ffffff; border-radius: 16px; max-width: 480px; margin: 0 auto; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
     .header { text-align: center; margin-bottom: 24px; }
     .header .icon { font-size: 48px; }
-    .header h1 { font-size: 22px; font-weight: 700; margin: 8px 0 4px; color: #0369a1; }
+    .header h1 { font-size: 22px; font-weight: 700; margin: 8px 0 4px; color: #ff7a5c; }
     .header p { color: #6b7280; font-size: 14px; margin: 0; }
     .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
     .detail-row:last-child { border-bottom: none; }
@@ -80,27 +72,29 @@ function buildReminderHtml(opts: ReminderEmailOptions): string {
 }
 
 export async function sendReminderEmail(opts: ReminderEmailOptions): Promise<void> {
-  if (!env.EMAIL_USER || !env.EMAIL_PASS) {
-    console.warn("Email not configured – skipping reminder email for", opts.petName);
+  if (!env.RESEND_API_KEY) {
+    console.warn("Resend API key not configured – skipping reminder email for", opts.petName);
     return;
   }
 
   const label = opts.taskType === "medication" ? "Medication" : "Vaccination";
 
-  await transporter.sendMail({
-    from: env.EMAIL_FROM,
+  const { error } = await resend.emails.send({
+    from: "Whisker Diary <onboarding@resend.dev>", // swap to your domain once verified
     to: opts.to,
     subject: `🐾 Reminder: ${label} for ${opts.petName}`,
     html: buildReminderHtml(opts),
   });
+
+  if (error) {
+    throw new Error(`Resend error: ${error.message}`);
+  }
 }
 
 export async function verifyEmailConnection(): Promise<void> {
-  if (!env.EMAIL_USER || !env.EMAIL_PASS) return;
-  try {
-    await transporter.verify();
-    console.log("✅ Email transport ready");
-  } catch (err) {
-    console.warn("⚠️  Email transport not available:", (err as Error).message);
+  if (!env.RESEND_API_KEY) {
+    console.warn("⚠️  Resend API key not set – email disabled");
+    return;
   }
+  console.log("✅ Resend email ready");
 }
