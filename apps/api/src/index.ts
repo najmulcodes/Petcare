@@ -21,7 +21,8 @@ async function main() {
 
   process.on("unhandledRejection", (reason) => {
     console.error("Unhandled rejection:", reason);
-    process.exit(1);
+    // DO NOT exit — log and continue
+    // process.exit(1) was crashing the server on every cron error
   });
 }
 
