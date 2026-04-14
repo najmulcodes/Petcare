@@ -17,6 +17,7 @@ const envSchema = z.object({
   EMAIL_USER: z.string().default(""),
   EMAIL_PASS: z.string().default(""),
   EMAIL_FROM: z.string().default("Whisker Diary <noreply@whiskerdiary.app>"),
+  RESEND_API_KEY: z.string().default(""),
 });
 
 const parsed = envSchema.safeParse(process.env);
