@@ -32,6 +32,7 @@ export async function createPet(ownerId: string, input: CreatePetInput) {
     .insert({
       owner_id: ownerId,
       name: input.name,
+      image: input.image ?? null,
       dob: input.dob ?? null,
       breed: input.breed ?? null,
       color: input.color ?? null,
@@ -47,6 +48,7 @@ export async function createPet(ownerId: string, input: CreatePetInput) {
 export async function updatePet(petId: string, ownerId: string, input: UpdatePetInput) {
   const patch: Record<string, unknown> = {};
   if (input.name !== undefined) patch.name = input.name;
+  if (input.image !== undefined) patch.image = input.image;
   if (input.dob !== undefined) patch.dob = input.dob;
   if (input.breed !== undefined) patch.breed = input.breed;
   if (input.color !== undefined) patch.color = input.color;

@@ -26,6 +26,7 @@ export function DashboardPage() {
   const total = expenses?.reduce((sum, e) => sum + Number(e.amount_bdt), 0) ?? 0;
   const recentExpenses = expenses?.slice(0, 5) ?? [];
   const firstName = user?.email?.split("@")[0] ?? "there";
+  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
 
   return (
     <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
@@ -36,9 +37,23 @@ export function DashboardPage() {
         className="rounded-3xl p-5 text-white"
         style={{ background: "linear-gradient(135deg, #ff7a5c 0%, #ff9a7c 100%)" }}
       >
-        <p className="text-sm font-medium text-white/70">Good day,</p>
-        <h1 className="text-2xl font-bold capitalize">{firstName} 👋</h1>
-        <p className="mt-1 text-xs text-white/60">Here's what's happening today.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-white/70">Good day,</p>
+            <h1 className="text-2xl font-bold capitalize">{firstName} 👋</h1>
+            <p className="mt-1 text-xs text-white/60">Here's what's happening today.</p>
+          </div>
+          {avatarUrl && (
+            <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-white/30">
+              <img
+                src={avatarUrl}
+                alt={firstName}
+                className="h-full w-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stats row */}
@@ -130,8 +145,17 @@ export function DashboardPage() {
             {pets.map((pet) => (
               <Link key={pet.id} to={`/pets/${pet.id}`}>
                 <div className="flex items-center gap-3 rounded-2xl bg-[#fff4f1] p-3 transition-all hover:shadow-soft lg:flex-row">
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-soft">
-                    🐶
+                  <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl bg-white shadow-soft flex items-center justify-center text-xl">
+                    {pet.image ? (
+                      <img
+                        src={pet.image}
+                        alt={pet.name}
+                        className="h-full w-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                    ) : (
+                      "🐶"
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{pet.name}</p>

@@ -10,6 +10,7 @@ export interface Pet {
   color: string | null;
   gender: "male" | "female" | "unknown" | null;
   notes: string | null;
+  image: string | null;   // ← added
   created_at: string;
   updated_at: string;
 }
@@ -21,6 +22,7 @@ export interface CreatePetInput {
   color?: string;
   gender?: "male" | "female" | "unknown";
   notes?: string;
+  image?: string;         // ← added
 }
 
 async function fetchPets(): Promise<Pet[]> {

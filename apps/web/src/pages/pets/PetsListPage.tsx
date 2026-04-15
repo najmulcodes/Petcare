@@ -61,8 +61,19 @@ export function PetsListPage() {
           {pets.map((pet) => (
             <div key={pet.id} className="rounded-3xl bg-white p-5 shadow-soft">
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[#fff4f1] text-3xl">
-                  🐶
+                <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-2xl bg-[#fff4f1] flex items-center justify-center text-3xl">
+                  {pet.image ? (
+                    <img
+                      src={pet.image}
+                      alt={pet.name}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    "🐶"
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-bold text-gray-900">{pet.name}</h2>

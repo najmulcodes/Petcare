@@ -1,11 +1,14 @@
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { usePet, useUpdatePet } from "../../hooks/usePets";
+import { uploadImage } from "../../lib/cloudinary";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Button } from "../../components/ui/Button";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { InlineError, ErrorState } from "../../components/ui/ErrorState";
+
+const PET_FALLBACK = "🐶";
 
 export function EditPetPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,29 +18,63 @@ export function EditPetPage() {
   const [form, setForm] = useState({ name: "", dob: "", breed: "", color: "", gender: "", notes: "" });
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    if (pet) {
-      setForm({
-        name: pet.name,
-        dob: pet.dob ?? "",
-        breed: pet.breed ?? "",
-        color: pet.color ?? "",
-        gender: pet.gender ?? "",
-        notes: pet.notes ?? "",
-      });
-    }
+    if (!pet) return;
+    setForm({
+      name: pet.name,
+      dob: pet.dob ?? "",
+      breed: pet.breed ?? "",
+      color: pet.color ?? "",
+      gender: pet.gender ?? "",
+      notes: pet.notes ?? "",
+    });
+    setImagePreview(pet.image ?? null);
   }, [pet]);
 
   if (isLoading) return <PageSpinner />;
   if (error || !pet) return <ErrorState title="Pet not found" message="This pet could not be loaded." />;
 
+  // After this point TypeScript knows pet is defined — used in closures below
+  const safePet = pet;
+
   function set(field: string, value: string) {
     setForm((p) => ({ ...p, [field]: value }));
   }
 
-  function handleSubmit(e: FormEvent) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setImageFile(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview(safePet.image ?? null);
+    }
+  }
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFormError(null);
+
+    let imageUrl: string | undefined = safePet.image ?? undefined;
+
+    if (imageFile) {
+      try {
+        setUploading(true);
+        imageUrl = await uploadImage(imageFile);
+      } catch (err) {
+        setFormError(err instanceof Error ? err.message : "Image upload failed");
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
     updatePet.mutate(
       {
         id: id!,
@@ -47,6 +84,7 @@ export function EditPetPage() {
         color: form.color || undefined,
         gender: (form.gender as "male" | "female" | "unknown") || undefined,
         notes: form.notes || undefined,
+        image: imageUrl,
       },
       {
         onSuccess: () => navigate(`/pets/${id}`),
@@ -64,6 +102,52 @@ export function EditPetPage() {
 
       <div className="rounded-3xl bg-white p-6 shadow-soft">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Image upload */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Photo</label>
+            <div className="flex items-center gap-4">
+              <div
+                className="flex h-16 w-16 flex-shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-[#fff4f1] overflow-hidden text-3xl"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                ) : (
+                  PET_FALLBACK
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-xl border border-[#eeddd3] bg-[#f6eee9] px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-[#eeddd3] transition-colors text-left"
+                >
+                  {imageFile ? "Change photo" : "Replace photo"}
+                </button>
+                {imageFile && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImageFile(null);
+                      setImagePreview(safePet.image ?? null);
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                    className="text-xs text-red-400 hover:text-red-600 text-left"
+                  >
+                    Revert
+                  </button>
+                )}
+              </div>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+
           <Input label="Name *" value={form.name} onChange={(e) => set("name", e.target.value)} required />
           <Input label="Date of birth" type="date" value={form.dob} onChange={(e) => set("dob", e.target.value)} />
           <Input label="Breed" value={form.breed} onChange={(e) => set("breed", e.target.value)} />
@@ -100,7 +184,7 @@ export function EditPetPage() {
                 Cancel
               </button>
             </Link>
-            <Button type="submit" loading={updatePet.isPending} className="flex-1">
+            <Button type="submit" loading={uploading || updatePet.isPending} className="flex-1">
               Save changes
             </Button>
           </div>
