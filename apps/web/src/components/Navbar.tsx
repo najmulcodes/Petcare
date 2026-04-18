@@ -34,8 +34,8 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 xl:px-10">
         <Link to={user ? "/dashboard" : "/"} className="flex min-w-0 items-center gap-3 text-gray-800">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-soft">
-            <span className="font-display text-lg text-[#ff7a5c]">W</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-soft overflow-hidden">
+            <img src="/logo.png" alt="Whisker Diary" className="w-8 h-8 rounded-xl object-cover" />
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b28d80]">Whisker Diary</p>

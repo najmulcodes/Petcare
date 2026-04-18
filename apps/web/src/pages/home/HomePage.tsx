@@ -1,237 +1,159 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 
 const features = [
   {
-    title: "Pet profiles that stay tidy",
-    description: "Keep each pet's photo, identity details, history, and care notes together so the whole household knows what matters.",
+    emoji: "💸",
+    title: "Track Expenses",
+    description: "Log food, vet visits, and everyday pet spending in seconds.",
   },
   {
-    title: "Vaccines, meds, and reminders",
-    description: "Track routine care, spot upcoming due dates, and keep important records in a place that is easy to update on the go.",
+    emoji: "🐾",
+    title: "Manage Pet Profiles",
+    description: "Keep each pet's details, photo, and notes neatly organized.",
   },
   {
-    title: "Expense visibility without spreadsheets",
-    description: "See recent spending and monthly totals quickly, whether you are budgeting for food, vet visits, or recurring care.",
+    emoji: "💉",
+    title: "Vaccines & Reminders",
+    description: "Stay on top of due dates without messy notes or missed follow-ups.",
   },
 ];
 
 const steps = [
   {
-    label: "01",
-    title: "Create your space",
-    description: "Start with your account, add your name, and bring each pet into one calm home base.",
+    title: "Add your pets",
+    description: "Create a profile for each pet and keep their essentials in one place.",
   },
   {
-    label: "02",
-    title: "Capture everyday records",
-    description: "Save pet details, upload photos, log vaccines, and record costs as life happens.",
+    title: "Track daily care",
+    description: "Save vaccinations, routines, and notes as life happens.",
   },
   {
-    label: "03",
-    title: "Stay ahead of care",
-    description: "Use the dashboard to review spending, upcoming needs, and the records you may need at a glance.",
+    title: "See the full picture",
+    description: "Review care history and spending from one clear dashboard.",
   },
-];
-
-const trustPoints = [
-  "Built for real pet households, not a one-page demo.",
-  "Simple enough for daily use, structured enough for long-term history.",
-  "Warm, low-stress design that works across phone, tablet, and desktop.",
 ];
 
 export function HomePage() {
-  const { user } = useAuth();
-
   return (
-    <div className="min-h-screen pt-20">
-      <section className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 xl:px-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-center">
+    <div className="min-h-screen pt-14">
+      <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
+        <div className="grid items-center gap-10 lg:grid-cols-2">
           <div className="space-y-6">
-            <div className="app-chip">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              One calm place for pet care and spending
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/80 bg-white/85 px-4 py-2 text-sm font-semibold text-[#8c776f] shadow-sm backdrop-blur-sm">
+              <img src="/paw-icon.svg" className="w-4 h-4" />
+              Pet care + expense tracking
             </div>
 
             <div className="space-y-4">
               <h1 className="font-display text-4xl font-semibold leading-tight text-[#221a16] sm:text-5xl lg:text-6xl">
-                Keep every pet detail, care record, and expense in one polished home.
+                All your pet care, health, and expenses — in one place
               </h1>
-              <p className="max-w-2xl text-base leading-8 text-[#7e6d66] sm:text-lg">
-                Whisker Diary helps pet parents organize the daily details that are easy to lose: profiles, vaccines,
-                medication notes, reminders, and the cost of caring well.
+              <p className="max-w-xl text-base leading-8 text-[#7e6d66] sm:text-lg">
+                Track vaccinations, daily care, and spending without messy notes or scattered apps.
               </p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
-                to={user ? "/dashboard" : "/login"}
-                className="inline-flex items-center justify-center rounded-2xl px-6 py-3.5 text-sm font-semibold text-white transition-all hover:scale-[1.01]"
+                to="/login?mode=signup"
+                className="inline-flex items-center justify-center rounded-2xl px-6 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-xl"
                 style={{ background: "#ff7a5c", boxShadow: "0 16px 32px rgba(255, 122, 92, 0.22)" }}
               >
-                {user ? "Open your dashboard" : "Create your account"}
+                Get Started
               </Link>
               <a
                 href="#how-it-works"
-                className="inline-flex items-center justify-center rounded-2xl border border-warm-200 bg-white/85 px-6 py-3.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-white"
+                className="inline-flex items-center justify-center rounded-2xl border border-warm-200 bg-white/85 px-6 py-3.5 text-sm font-semibold text-gray-700 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-lg"
               >
                 See how it works
               </a>
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="app-panel px-5 py-4">
-                <p className="text-2xl font-semibold text-[#221a16]">Profiles</p>
-                <p className="mt-1 text-sm text-[#7e6d66]">Photo-ready pet records with the details you actually revisit.</p>
-              </div>
-              <div className="app-panel px-5 py-4">
-                <p className="text-2xl font-semibold text-[#221a16]">Care</p>
-                <p className="mt-1 text-sm text-[#7e6d66]">Vaccination history, medication logs, and upcoming needs in one flow.</p>
-              </div>
-              <div className="app-panel px-5 py-4">
-                <p className="text-2xl font-semibold text-[#221a16]">Spending</p>
-                <p className="mt-1 text-sm text-[#7e6d66]">Monthly clarity without hunting through messages or receipts.</p>
-              </div>
-            </div>
           </div>
 
           <div className="relative">
-            <div className="absolute inset-x-8 top-6 h-28 rounded-full bg-[#ffd9cc]/50 blur-3xl" />
-            <div className="app-panel relative overflow-hidden p-5 sm:p-6">
-              <div className="rounded-[24px] border border-[#f2e3da] bg-[#fff8f4] p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b28d80]">Dashboard</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-[#221a16]">A softer way to stay organized</h2>
-                  </div>
-                  <div className="rounded-2xl bg-white px-3 py-2 text-right shadow-soft">
-                    <p className="text-xs text-[#8c776f]">This month</p>
-                    <p className="text-lg font-semibold text-[#221a16]">Health + home</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[22px] bg-white p-4 shadow-soft">
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#b28d80]">Care status</p>
-                    <div className="mt-4 space-y-3">
-                      <div className="rounded-2xl bg-[#fff4f1] px-4 py-3">
-                        <p className="text-sm font-semibold text-[#221a16]">Rabies booster due soon</p>
-                        <p className="mt-1 text-xs text-[#8c776f]">Keep records and due dates beside the pet profile.</p>
-                      </div>
-                      <div className="rounded-2xl bg-[#f6eee9] px-4 py-3">
-                        <p className="text-sm font-semibold text-[#221a16]">Medication schedule tracked</p>
-                        <p className="mt-1 text-xs text-[#8c776f]">Simple lists that stay readable on mobile and desktop.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[22px] bg-white p-4 shadow-soft">
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#b28d80]">Recent activity</p>
-                    <div className="mt-4 space-y-3">
-                      <div className="flex items-center justify-between rounded-2xl border border-[#f3e5dc] px-4 py-3">
-                        <div>
-                          <p className="text-sm font-semibold text-[#221a16]">Food restock</p>
-                          <p className="text-xs text-[#8c776f]">Quickly logged</p>
-                        </div>
-                        <span className="text-sm font-semibold text-[#ff7a5c]">BDT 2,350</span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-2xl border border-[#f3e5dc] px-4 py-3">
-                        <div>
-                          <p className="text-sm font-semibold text-[#221a16]">Vet follow-up saved</p>
-                          <p className="text-xs text-[#8c776f]">Record stays attached</p>
-                        </div>
-                        <span className="text-sm font-semibold text-[#221a16]">Today</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-[24px] bg-[#221a16] px-5 py-4 text-white">
-                  <p className="text-sm font-semibold">Designed to help you decide quickly</p>
-                  <p className="mt-1 text-sm text-white/70">
-                    If you want one place to manage pet records and spending without a complicated setup, this is what Whisker Diary is for.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <div className="absolute inset-x-10 top-8 h-32 rounded-full bg-[#ffd9cc]/60 blur-3xl" />
+            <img
+              src="/banner.png"
+              alt="Whisker Diary app preview"
+              className="relative w-full rounded-3xl object-cover shadow-xl max-h-[520px]"
+            />
           </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 xl:px-10">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+      <section id="features" className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+        <div className="space-y-4">
+          <div className="app-chip">Core features</div>
+          <h2 className="font-display text-3xl font-semibold leading-tight text-[#221a16] sm:text-4xl">
+            Built for everyday pet management
+          </h2>
+          <p className="max-w-xl text-sm leading-7 text-[#7e6d66] sm:text-base">
+            Keep your most important care details visible, simple, and easy to update.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff4f1] text-2xl">
+                {feature.emoji}
+              </div>
+              <h3 className="mt-5 text-xl font-semibold text-[#221a16]">{feature.title}</h3>
+              <p className="mt-2 max-w-xs text-sm leading-7 text-[#7e6d66]">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+        <div className="rounded-[32px] border border-white/80 bg-white/90 p-8 shadow-xl">
           <div className="space-y-4">
-            <div className="app-chip">What you get</div>
-            <h2 className="section-heading">A clear product for everyday pet care, not a cluttered tracker.</h2>
-            <p className="section-copy">
-              The goal is simple: make it easy to know what happened, what is due next, and what you spent without turning pet care into admin work.
+            <div className="app-chip">How it works</div>
+            <h2 className="font-display text-3xl font-semibold leading-tight text-[#221a16] sm:text-4xl">
+              Start fast and stay organized
+            </h2>
+            <p className="max-w-xl text-sm leading-7 text-[#7e6d66] sm:text-base">
+              Set up your account once, then keep every pet detail and expense where you can actually find it.
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {features.map((feature) => (
-              <div key={feature.title} className="app-panel h-full p-5">
-                <p className="text-lg font-semibold text-[#221a16]">{feature.title}</p>
-                <p className="mt-3 text-sm leading-7 text-[#7e6d66]">{feature.description}</p>
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {steps.map((step, index) => (
+              <div key={step.title} className="rounded-3xl bg-[#fff8f4] p-5 shadow-lg">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-sm font-bold text-[#ff7a5c] shadow-sm">
+                  {index + 1}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-[#221a16]">{step.title}</h3>
+                <p className="mt-2 max-w-xs text-sm leading-7 text-[#7e6d66]">{step.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 xl:px-10">
-        <div className="app-panel overflow-hidden p-6 sm:p-8">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-start">
-            <div className="space-y-4">
-              <div className="app-chip">How it works</div>
-              <h2 className="section-heading">From sign-up to daily use in a few calm steps.</h2>
-              <p className="section-copy">
-                You do not need a big setup session. Add your account, bring in your pets, and start recording what matters as you go.
-              </p>
+      <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+        <div
+          className="rounded-[32px] p-8 text-white shadow-xl sm:p-10"
+          style={{ background: "linear-gradient(145deg, #ff8a6f 0%, #ff7a5c 52%, #e55f41 100%)" }}
+        >
+          <div className="space-y-4">
+            <div className="inline-flex items-center rounded-full bg-white/15 px-4 py-2 text-sm font-semibold text-white/85">
+              Ready to simplify pet care?
             </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              {steps.map((step) => (
-                <div key={step.label} className="rounded-[24px] border border-[#f1e3da] bg-[#fff8f4] p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b28d80]">{step.label}</p>
-                  <p className="mt-4 text-lg font-semibold text-[#221a16]">{step.title}</p>
-                  <p className="mt-3 text-sm leading-7 text-[#7e6d66]">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 xl:px-10">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.9fr)]">
-          <div className="app-panel p-6 sm:p-8">
-            <div className="app-chip">Why people stay</div>
-            <h2 className="mt-4 section-heading">Useful enough to keep open, gentle enough to trust with your routine.</h2>
-            <div className="mt-6 space-y-4">
-              {trustPoints.map((point) => (
-                <div key={point} className="flex items-start gap-3 rounded-2xl bg-[#fff8f4] px-4 py-4">
-                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#ff7a5c]" />
-                  <p className="text-sm leading-7 text-[#5f4d46]">{point}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="rounded-[32px] p-6 text-white shadow-card sm:p-8"
-            style={{ background: "linear-gradient(145deg, #ff8a6f 0%, #ff7a5c 45%, #e55f41 100%)" }}
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/75">Ready to decide?</p>
-            <h2 className="mt-4 font-display text-3xl font-semibold leading-tight">Start with your first pet profile and build from there.</h2>
-            <p className="mt-4 text-sm leading-7 text-white/80">
-              Whisker Diary is best for people who want practical organization: records, reminders, and spending clarity without a complicated learning curve.
+            <h2 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
+              Keep every care detail and expense in one product you will actually use
+            </h2>
+            <p className="max-w-xl text-sm leading-7 text-white/80 sm:text-base">
+              Start with one pet, add records as you go, and get a cleaner view of health and spending right away.
             </p>
             <Link
-              to={user ? "/dashboard" : "/login"}
-              className="mt-6 inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-[#e55f41] transition-transform hover:scale-[1.01]"
+              to="/login?mode=signup"
+              className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3.5 text-sm font-semibold text-[#e55f41] transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              {user ? "Go to dashboard" : "Sign up and get organized"}
+              Get Started
             </Link>
           </div>
         </div>

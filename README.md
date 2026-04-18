@@ -1,51 +1,93 @@
 # 🐾 Whisker Diary
 
-**All your pet care and home expenses — in one unified system.**
+**A full-stack pet care management system for tracking health, expenses, and daily records in one place.**
 
-Whisker Diary is a full-stack SaaS-style application designed to help you manage your pets, track expenses, and never miss important reminders — all in a clean, structured, and intuitive interface.
+Whisker Diary centralizes everything a pet owner needs — replacing scattered notes, receipts, and reminders with a structured and consistent system.
 
 ---
 
-## ✨ Core Features
+## ✨ Overview
+
+Pet care involves more than routine — it requires tracking, consistency, and visibility.
+
+Whisker Diary provides:
+
+* Structured pet profiles
+* Health and vaccination tracking
+* Expense monitoring
+* Reminder automation
+
+All within a focused, distraction-free interface.
+
+---
+
+## 🚀 Core Features
 
 ### 🐶 Pet Management
 
-* Create and manage pet profiles
-* Track breed, age, notes, and details
-* Individual pet timelines (ready for extension)
-
-### 💰 Expense Tracking
-
-* Log daily home expenses
-* Monthly summaries and breakdowns
-* Clean transaction history
-
-### ⏰ Reminders & Notifications
-
-* Medication schedules
-* Vaccination tracking
-* Vet visit logs
-* Background cron job for notifications
-
-### 🔐 Authentication
-
-* Email/password login
-* Google OAuth (via Supabase)
-* Secure session handling with JWT
-
-### 📬 Email Notifications
-
-* Automated email alerts via Nodemailer
-* Reminder-based triggers (cron powered)
+* Manage multiple pets
+* Profile image upload via Cloudinary
+* Store essential details (name, type, notes)
 
 ---
 
-## 🧱 Tech Stack
+### 💉 Health Tracking
+
+* Vaccination records
+* Medication logs
+* Due date tracking
+* Vet notes and follow-ups
+
+---
+
+### 💸 Expense Tracking
+
+* Track daily and monthly expenses
+* Categorized spending system
+* Monthly summaries
+* Clear cost visibility per pet
+
+---
+
+### 🔔 Reminders System
+
+* Scheduled reminders for vaccines and medications
+* Background job processing with node-cron
+* Email notifications via Nodemailer
+
+---
+
+### 🔐 Authentication
+
+* Email/password authentication
+* Google OAuth (Supabase)
+* Session persistence and secure token handling
+
+---
+
+### 🖼️ Media Upload
+
+* Direct Cloudinary upload (client-side)
+* Optimized image delivery via CDN
+
+---
+
+## 🧠 Architecture Highlights
+
+* Monorepo structure using pnpm workspaces
+* Shared types across frontend and backend
+* Supabase for authentication and database
+* Stateless API with token-based auth
+* Background job system for scheduled notifications
+
+---
+
+## 🛠️ Tech Stack
 
 ### Frontend
 
-* React 18
-* Vite
+* React (Vite)
+* TypeScript
 * Tailwind CSS
 * React Router
 * React Query
@@ -54,39 +96,55 @@ Whisker Diary is a full-stack SaaS-style application designed to help you manage
 
 * Node.js
 * Express
-* Supabase (PostgreSQL + Auth)
-* Zod (validation)
+* TypeScript
+* Supabase
+* Nodemailer
+* Node-cron
 
 ### Infrastructure
 
-* Supabase (DB + Auth)
-* Nodemailer (SMTP)
-* Cron jobs for background tasks
+* Vercel (Frontend)
+* Render (Backend)
+* Cloudinary (Media)
 
 ---
 
 ## 📁 Project Structure
 
 ```
-petcare-home/
-├── apps/
-│   ├── api/        # Express backend
-│   └── web/        # React frontend
-├── packages/
-│   └── shared-types
-└── supabase/
-    └── schema.sql
+apps/
+  web/        → Frontend (React + Vite)
+  api/        → Backend (Express)
+
+packages/
+  shared-types → Shared types
+
+supabase/
+  schema.sql
 ```
 
 ---
 
 ## ⚙️ Environment Setup
 
+### Frontend (`apps/web/.env`)
+
+```
+VITE_SUPABASE_URL=your_project_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_API_URL=http://localhost:4000
+
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_preset
+```
+
+---
+
 ### Backend (`apps/api/.env`)
 
 ```
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_URL=your_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
 PORT=4000
 NODE_ENV=development
@@ -95,89 +153,57 @@ ALLOWED_ORIGINS=http://localhost:5173
 
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=
-EMAIL_PASS=
-EMAIL_FROM="Whisker Diary <your-email@gmail.com>"
+EMAIL_USER=your_email
+EMAIL_PASS=your_app_password
+EMAIL_FROM="Whisker Diary <your_email>"
 ```
 
 ---
 
-### Frontend (`apps/web/.env`)
+## 🧪 Run Locally
 
-```
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-```
-
----
-
-## 🚀 Getting Started
-
-Install dependencies:
-
-```
+```bash
 pnpm install
-```
-
-Run backend:
-
-```
 pnpm dev:api
-```
-
-Run frontend:
-
-```
 pnpm dev:web
 ```
 
 ---
 
-## 🔐 Security Notes
+## 🚀 Deployment
 
-* Never commit `.env` files
-* Use **service_role key only in backend**
-* Use **anon key only in frontend**
-* Rotate keys if exposed
+### Frontend (Vercel)
 
----
+* Root: `apps/web`
+* Build: `pnpm build`
+* Output: `dist`
 
-## 🧭 Roadmap
+### Backend (Render)
 
-* Real-time notifications
-* Mobile-first UI improvements
-* Advanced analytics (expenses & pet health)
-* Multi-user family sharing
-* Push notification system (in progress)
+* Root: `apps/api`
+* Build: `pnpm install && pnpm build`
+* Start: `pnpm start`
 
 ---
 
-## 🧠 Design Philosophy
+## 📌 Roadmap
 
-Whisker Diary focuses on:
-
-* clarity over complexity
-* structured data over scattered notes
-* real-life usability over feature overload
-
----
-
-## 📌 Status
-
-Actively evolving into a **production-grade SaaS application**.
+* User profile settings (avatar, name, DOB)
+* Improved password recovery flow
+* OCR-based vaccine record scanning
+* Push notification support
+* Analytics dashboard
+* Mobile app (React Native)
 
 ---
 
-## 👨‍💻 Author
+## 👤 Author
 
-Built by **Najmul Hasan**
-Full-Stack Developer (MERN / Next.js / TypeScript)
+Najmul Hasan (Shariar)
+Full Stack Developer (MERN)
 
 ---
 
-## ⭐ Why this project matters
+## 📄 License
 
-Most pet apps handle only pets.
-Most finance apps ignore daily life context.
-
-Whisker Diary combines both — creating a **practical, real-world system** instead of isolated tools.
+MIT

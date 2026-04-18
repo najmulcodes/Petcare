@@ -1,30 +1,38 @@
 import { useState, FormEvent } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { setAccessToken } from "../../lib/api";
 import { InlineError } from "../../components/ui/ErrorState";
 import { requestNotificationPermission, notify } from "../../lib/notifications";
 import { Input } from "../../components/ui/Input";
 import { PasswordField } from "../../components/ui/PasswordField";
+import { ResetPasswordModal } from "../../components/ResetPasswordModal";
 
 type AuthView = "signin" | "signup";
 
 const highlights = [
-  "Keep pet profiles, reminders, and expense history in one calm workspace.",
-  "Use the same account across phone, tablet, and desktop without the layout feeling cramped.",
-  "Stay ready for vet visits with records that are easy to review and update.",
+  "Track pet care, vaccinations, and daily details in one workspace.",
+  "Keep expenses tidy without switching between notes, chats, and spreadsheets.",
+  "Stay organized on mobile, tablet, and desktop with the same calm flow.",
 ];
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [view, setView] = useState<AuthView>("signin");
+  const [searchParams] = useSearchParams();
+  const [view, setView] = useState<AuthView>(() =>
+    searchParams.get("mode") === "signup" ? "signup" : "signin"
+  );
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
   const [resetSuccess, setResetSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,29 +114,49 @@ export function LoginPage() {
     if (oauthError) setError(oauthError.message);
   }
 
-  async function handleForgotPassword() {
-    setError(null);
+  function openResetModal() {
+    setResetError(null);
+    setResetSuccess(null);
+    setResetModalOpen(true);
+  }
+
+  function closeResetModal() {
+    setResetModalOpen(false);
+    setResetLoading(false);
+    setResetError(null);
+    setResetSuccess(null);
+  }
+
+  async function handleResetPassword(resetEmail: string) {
+    setResetError(null);
     setResetSuccess(null);
 
-    if (!email.trim()) {
-      setError("Enter your email first to reset your password.");
+    const trimmedEmail = resetEmail.trim();
+    if (!trimmedEmail) {
+      setResetError("Please enter your email address.");
+      return;
+    }
+
+    if (!emailPattern.test(trimmedEmail)) {
+      setResetError("Enter a valid email address.");
       return;
     }
 
     setResetLoading(true);
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error: resetRequestError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
       redirectTo: window.location.origin + "/reset-password",
     });
 
     setResetLoading(false);
 
-    if (resetError) {
-      setError(resetError.message);
+    if (resetRequestError) {
+      setResetError(resetRequestError.message);
       return;
     }
 
     setResetSuccess("Password reset link sent to your email");
+    setEmail(trimmedEmail);
   }
 
   return (
@@ -137,7 +165,10 @@ export function LoginPage() {
         <div className="grid gap-6 lg:grid-cols-[minmax(20rem,1.05fr)_minmax(24rem,0.95fr)] lg:items-stretch">
           <section className="app-panel flex flex-col justify-between overflow-hidden p-6 sm:p-8 lg:p-10">
             <div className="space-y-5">
-              <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46]">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46]"
+              >
                 <span aria-hidden="true">←</span>
                 Back to home
               </Link>
@@ -145,10 +176,10 @@ export function LoginPage() {
               <div className="space-y-4">
                 <div className="app-chip">Whisker Diary</div>
                 <h1 className="font-display text-4xl font-semibold leading-tight text-[#221a16] sm:text-5xl">
-                  The smoother way to manage pet care details.
+                  Sign in to your pet care workspace
                 </h1>
-                <p className="max-w-2xl text-base leading-8 text-[#7e6d66]">
-                  Sign in to your workspace or create an account to start organizing pet records, reminders, and household spending in one place.
+                <p className="max-w-xl text-base leading-8 text-[#7e6d66]">
+                  Access your pet profiles, care reminders, and spending history from one calm, organized dashboard.
                 </p>
               </div>
             </div>
@@ -240,10 +271,10 @@ export function LoginPage() {
                 </div>
               ) : (
                 <>
-                  <p className="mb-6 text-sm leading-7 text-[#7e6d66]">
+                  <p className="mb-6 max-w-xl text-sm leading-7 text-[#7e6d66]">
                     {view === "signin"
-                      ? "Sign in with your email and password to pick up where you left off."
-                      : "Create an account with your name, email, and password. We will ask you to verify your email before you continue."}
+                      ? "Use your email and password to continue where you left off."
+                      : "Create your account with your name, email, and password. We will ask you to verify your email before you continue."}
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -262,10 +293,7 @@ export function LoginPage() {
                       label="Email"
                       type="email"
                       value={email}
-                      onChange={(event) => {
-                        setEmail(event.target.value);
-                        setResetSuccess(null);
-                      }}
+                      onChange={(event) => setEmail(event.target.value)}
                       placeholder="you@example.com"
                       autoComplete="email"
                       required
@@ -274,10 +302,7 @@ export function LoginPage() {
                     <PasswordField
                       label="Password"
                       value={password}
-                      onChange={(event) => {
-                        setPassword(event.target.value);
-                        setResetSuccess(null);
-                      }}
+                      onChange={(event) => setPassword(event.target.value)}
                       placeholder="Enter your password"
                       autoComplete={view === "signup" ? "new-password" : "current-password"}
                       required
@@ -287,11 +312,10 @@ export function LoginPage() {
                       <div className="-mt-1 flex justify-end">
                         <button
                           type="button"
-                          onClick={handleForgotPassword}
-                          disabled={resetLoading}
-                          className="text-right text-xs font-medium text-gray-400 transition-colors hover:text-[#ff7a5c] disabled:cursor-not-allowed disabled:opacity-60"
+                          onClick={openResetModal}
+                          className="text-right text-xs font-medium text-gray-400 transition-colors hover:text-[#ff7a5c]"
                         >
-                          {resetLoading ? "Sending reset link..." : "Forgot password?"}
+                          Forgot password?
                         </button>
                       </div>
                     )}
@@ -307,11 +331,6 @@ export function LoginPage() {
                       />
                     )}
 
-                    {resetSuccess && (
-                      <p className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                        {resetSuccess}
-                      </p>
-                    )}
                     {error && <InlineError message={error} />}
 
                     <button
@@ -353,6 +372,16 @@ export function LoginPage() {
           </section>
         </div>
       </div>
+
+      <ResetPasswordModal
+        open={resetModalOpen}
+        initialEmail={email}
+        loading={resetLoading}
+        error={resetError}
+        success={resetSuccess}
+        onClose={closeResetModal}
+        onSubmit={handleResetPassword}
+      />
     </div>
   );
 }
