@@ -29,6 +29,10 @@
     color: var(--text-strong);
   }
 
+  body.modal-open [data-bottom-nav="true"] {
+    display: none;
+  }
+
   * {
     @apply box-border;
   }

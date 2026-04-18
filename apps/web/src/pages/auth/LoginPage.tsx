@@ -24,6 +24,8 @@ export function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function completeSignedInSession(accessToken: string) {
@@ -102,6 +104,31 @@ export function LoginPage() {
       options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (oauthError) setError(oauthError.message);
+  }
+
+  async function handleForgotPassword() {
+    setError(null);
+    setResetSuccess(null);
+
+    if (!email.trim()) {
+      setError("Enter your email first to reset your password.");
+      return;
+    }
+
+    setResetLoading(true);
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password",
+    });
+
+    setResetLoading(false);
+
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+
+    setResetSuccess("Password reset link sent to your email");
   }
 
   return (
@@ -235,7 +262,10 @@ export function LoginPage() {
                       label="Email"
                       type="email"
                       value={email}
-                      onChange={(event) => setEmail(event.target.value)}
+                      onChange={(event) => {
+                        setEmail(event.target.value);
+                        setResetSuccess(null);
+                      }}
                       placeholder="you@example.com"
                       autoComplete="email"
                       required
@@ -244,11 +274,27 @@ export function LoginPage() {
                     <PasswordField
                       label="Password"
                       value={password}
-                      onChange={(event) => setPassword(event.target.value)}
+                      onChange={(event) => {
+                        setPassword(event.target.value);
+                        setResetSuccess(null);
+                      }}
                       placeholder="Enter your password"
                       autoComplete={view === "signup" ? "new-password" : "current-password"}
                       required
                     />
+
+                    {view === "signin" && (
+                      <div className="-mt-1 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          disabled={resetLoading}
+                          className="text-right text-xs font-medium text-gray-400 transition-colors hover:text-[#ff7a5c] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {resetLoading ? "Sending reset link..." : "Forgot password?"}
+                        </button>
+                      </div>
+                    )}
 
                     {view === "signup" && (
                       <PasswordField
@@ -261,6 +307,11 @@ export function LoginPage() {
                       />
                     )}
 
+                    {resetSuccess && (
+                      <p className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {resetSuccess}
+                      </p>
+                    )}
                     {error && <InlineError message={error} />}
 
                     <button

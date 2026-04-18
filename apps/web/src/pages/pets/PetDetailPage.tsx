@@ -37,6 +37,8 @@ function AddMedicationModal({ petId, open, onClose }: { petId: string; open: boo
   const createMedication = useCreateMedication(petId);
   const [form, setForm] = useState({ name: "", dosage: "", frequency: "daily", start_date: "", end_date: "" });
   const [error, setError] = useState<string | null>(null);
+  const stickyFooterClass =
+    "sticky bottom-0 -mx-5 mt-2 flex flex-col-reverse gap-3 bg-white px-5 pt-4 pb-6 pb-[calc(env(safe-area-inset-bottom)+24px)] sm:-mx-6 sm:flex-row sm:px-6 sm:pb-6";
 
   function set(field: string, value: string) {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -85,7 +87,7 @@ function AddMedicationModal({ petId, open, onClose }: { petId: string; open: boo
           <Input label="End date" type="date" value={form.end_date} onChange={(event) => set("end_date", event.target.value)} />
         </div>
         {error && <InlineError message={error} />}
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+        <div className={stickyFooterClass}>
           <button
             type="button"
             onClick={onClose}

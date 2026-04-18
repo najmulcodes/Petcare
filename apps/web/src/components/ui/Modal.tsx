@@ -15,12 +15,19 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       if (event.key === "Escape") onClose();
     };
 
-    const previousOverflow = document.body.style.overflow;
+    const currentCount = Number(document.body.dataset.modalCount ?? "0");
+    document.body.dataset.modalCount = String(currentCount + 1);
+    document.body.classList.add("modal-open");
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handler);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      const nextCount = Math.max(Number(document.body.dataset.modalCount ?? "1") - 1, 0);
+      document.body.dataset.modalCount = String(nextCount);
+      if (nextCount === 0) {
+        document.body.classList.remove("modal-open");
+        document.body.style.overflow = "";
+      }
       window.removeEventListener("keydown", handler);
     };
   }, [open, onClose]);
@@ -31,7 +38,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-[#2d211c]/35 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-[32px] border border-white/70 bg-white shadow-card sm:max-h-[88vh] sm:max-w-xl sm:rounded-[32px]">
+      <div className="relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-[32px] border border-white/70 bg-white shadow-card sm:max-h-[90vh] sm:max-w-xl sm:rounded-[32px]">
         <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-[#e7d5cb] sm:hidden" />
         <div className="flex items-center justify-between border-b border-[#f1e3da] px-5 py-4 sm:px-6">
           <h2 className="text-base font-bold text-gray-900">{title}</h2>
@@ -44,7 +51,9 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             </svg>
           </button>
         </div>
-        <div className="overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
+        <div className="overflow-y-auto px-5 pt-5 pb-24 pb-[calc(env(safe-area-inset-bottom)+96px)] sm:px-6 sm:pb-8">
+          {children}
+        </div>
       </div>
     </div>
   );

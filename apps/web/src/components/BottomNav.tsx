@@ -54,7 +54,7 @@ export function BottomNav() {
   const displayName = getUserDisplayName(user);
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 md:hidden">
+    <div data-bottom-nav="true" className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 md:hidden">
       <nav
         className="flex items-center gap-1 rounded-[28px] border border-white/70 bg-white/92 px-3 py-2 backdrop-blur-sm"
         style={{ boxShadow: "0 16px 40px rgba(34, 26, 22, 0.12)" }}

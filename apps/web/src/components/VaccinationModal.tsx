@@ -55,6 +55,8 @@ export function VaccinationModal({ open, onClose, petId, vaccination }: Vaccinat
   const [savingImage, setSavingImage] = useState(false);
 
   const busy = createVaccination.isPending || updateVaccination.isPending || savingImage;
+  const stickyFooterClass =
+    "sticky bottom-0 -mx-5 mt-2 flex flex-col-reverse gap-3 bg-white px-5 pt-4 pb-6 pb-[calc(env(safe-area-inset-bottom)+24px)] sm:-mx-6 sm:flex-row sm:px-6 sm:pb-6";
 
   useEffect(() => {
     if (!open) return;
@@ -269,7 +271,7 @@ export function VaccinationModal({ open, onClose, petId, vaccination }: Vaccinat
 
         {error && <InlineError message={error} />}
 
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+        <div className={stickyFooterClass}>
           <button
             type="button"
             onClick={onClose}
