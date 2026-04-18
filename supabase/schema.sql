@@ -27,6 +27,7 @@ create table if not exists pets (
   id         uuid primary key default gen_random_uuid(),
   owner_id   uuid not null references auth.users(id) on delete cascade,
   name       text not null,
+  image      text,
   dob        date,
   breed      text,
   color      text,
@@ -78,10 +79,16 @@ create table if not exists vaccinations (
   administered_at date not null,
   next_due_at    date,
   notes          text,
+  card_image_url text,
+  ocr_text       text,
   created_at     timestamptz not null default now()
 );
 create index if not exists vaccinations_pet_idx on vaccinations(pet_id);
 create index if not exists vaccinations_next_due_idx on vaccinations(next_due_at);
+
+alter table if exists pets add column if not exists image text;
+alter table if exists vaccinations add column if not exists card_image_url text;
+alter table if exists vaccinations add column if not exists ocr_text text;
 
 create table if not exists vet_visits (
   id         uuid primary key default gen_random_uuid(),

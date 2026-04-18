@@ -39,6 +39,8 @@ export async function createVaccination(petId: string, ownerId: string, input: C
       administered_at: input.administered_at,
       next_due_at: input.next_due_at ?? null,
       notes: input.notes ?? null,
+      card_image_url: input.card_image_url ?? null,
+      ocr_text: input.ocr_text ?? null,
     })
     .select()
     .single();
@@ -53,6 +55,8 @@ export async function updateVaccination(vaccinationId: string, petId: string, ow
   if (input.administered_at !== undefined) patch.administered_at = input.administered_at;
   if (input.next_due_at !== undefined) patch.next_due_at = input.next_due_at;
   if (input.notes !== undefined) patch.notes = input.notes;
+  if (input.card_image_url !== undefined) patch.card_image_url = input.card_image_url;
+  if (input.ocr_text !== undefined) patch.ocr_text = input.ocr_text;
   if (Object.keys(patch).length === 0) throw new AppError(400, "No fields provided to update");
 
   const { data, error } = await supabaseAdmin

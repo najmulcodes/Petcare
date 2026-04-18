@@ -1,41 +1,45 @@
-import { useState, FormEvent, useRef } from "react";
+import { useState, FormEvent, useRef, ChangeEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCreatePet } from "../../hooks/usePets";
 import { uploadImage } from "../../lib/cloudinary";
+import { ImageCropper } from "../../components/ImageCropper";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Button } from "../../components/ui/Button";
 import { InlineError } from "../../components/ui/ErrorState";
-
-const PET_FALLBACK = "🐶";
+import { EntityAvatar } from "../../components/ui/EntityAvatar";
 
 export function AddPetPage() {
   const navigate = useNavigate();
   const createPet = useCreatePet();
   const [form, setForm] = useState({ name: "", dob: "", breed: "", color: "", gender: "", notes: "" });
   const [error, setError] = useState<string | null>(null);
-
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function set(field: string, value: string) {
-    setForm((p) => ({ ...p, [field]: value }));
+    setForm((previous) => ({ ...previous, [field]: value }));
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) return;
+
+    setCropSrc(URL.createObjectURL(file));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function handleCropDone(file: File) {
+    setCropSrc(null);
     setImageFile(file);
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
-    } else {
-      setImagePreview(null);
-    }
+    setImagePreview(URL.createObjectURL(file));
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
     setError(null);
 
     let imageUrl: string | undefined;
@@ -44,8 +48,8 @@ export function AddPetPage() {
       try {
         setUploading(true);
         imageUrl = await uploadImage(imageFile);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Image upload failed");
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Image upload failed");
         setUploading(false);
         return;
       } finally {
@@ -65,104 +69,131 @@ export function AddPetPage() {
       },
       {
         onSuccess: () => navigate("/pets"),
-        onError: (err) => setError(err instanceof Error ? err.message : "Failed to create pet"),
+        onError: (error) => setError(error instanceof Error ? error.message : "Failed to create pet"),
       }
     );
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-5">
-      <div className="flex items-center gap-3">
-        <Link to="/pets" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">← Back</Link>
-        <h1 className="text-xl font-bold text-gray-900">Add new pet 🐾</h1>
+    <div className="space-y-6">
+      {cropSrc && <ImageCropper imageSrc={cropSrc} onDone={handleCropDone} onCancel={() => setCropSrc(null)} />}
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <Link to="/pets" className="text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46]">
+            ← Back to pets
+          </Link>
+          <h1 className="mt-2 text-3xl font-semibold text-[#221a16]">Add a new pet</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-7 text-[#7e6d66]">
+            Start with the basics now. You can always return later to add more history, vaccines, and notes.
+          </p>
+        </div>
       </div>
 
-      <div className="rounded-3xl bg-white p-6 shadow-soft">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image upload */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Photo</label>
-            <div className="flex items-center gap-4">
-              <div
-                className="flex h-16 w-16 flex-shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-[#fff4f1] overflow-hidden text-3xl"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                ) : (
-                  PET_FALLBACK
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="rounded-xl border border-[#eeddd3] bg-[#f6eee9] px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-[#eeddd3] transition-colors text-left"
-                >
-                  {imageFile ? "Change photo" : "Upload photo"}
-                </button>
-                {imageFile && (
-                  <button
-                    type="button"
-                    onClick={() => { setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                    className="text-xs text-red-400 hover:text-red-600 text-left"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
+        <section className="app-panel p-5 sm:p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#b28d80]">Photo</p>
+          <h2 className="mt-2 text-xl font-semibold text-[#221a16]">Set the pet image</h2>
+          <p className="mt-2 text-sm leading-7 text-[#7e6d66]">
+            Upload a photo and crop it once so it fills cards, avatars, and detail pages cleanly.
+          </p>
 
-          <Input label="Name *" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Milo" required />
-          <Input label="Date of birth" type="date" value={form.dob} onChange={(e) => set("dob", e.target.value)} />
-          <Input label="Breed" value={form.breed} onChange={(e) => set("breed", e.target.value)} placeholder="e.g. Labrador" />
-          <Input label="Color" value={form.color} onChange={(e) => set("color", e.target.value)} placeholder="e.g. Golden" />
-          <Select
-            label="Gender"
-            value={form.gender}
-            onChange={(e) => set("gender", e.target.value)}
-            placeholder="Select gender"
-            options={[
-              { value: "male", label: "Male" },
-              { value: "female", label: "Female" },
-              { value: "unknown", label: "Unknown" },
-            ]}
-          />
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => set("notes", e.target.value)}
-              rows={3}
-              placeholder="Any additional notes..."
-              className="w-full rounded-2xl border border-[#eeddd3] bg-[#f6eee9] px-4 py-3 text-sm text-gray-800 placeholder-gray-300 outline-none transition-all focus:border-[#ff7a5c] focus:ring-2 focus:ring-[#ff7a5c]/15 resize-none"
-            />
-          </div>
+          <div className="mt-6 flex flex-col items-start gap-5 sm:flex-row sm:items-center xl:flex-col xl:items-start">
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="group">
+              <EntityAvatar
+                src={imagePreview}
+                name={form.name || "Pet"}
+                kind="pet"
+                className="h-32 w-32 rounded-[28px] border border-[#f1e3da]"
+                textClassName="text-2xl"
+              />
+              <span className="mt-3 block text-sm font-semibold text-[#5f4d46]">
+                {imageFile ? "Replace photo" : "Upload photo"}
+              </span>
+            </button>
 
-          {error && <InlineError message={error} />}
-
-          <div className="flex gap-3 pt-1">
-            <Link to="/pets" className="flex-1">
+            <div className="space-y-3">
               <button
                 type="button"
-                className="w-full rounded-2xl border border-[#eeddd3] bg-[#f6eee9] py-3 text-sm font-semibold text-gray-600 hover:bg-[#eeddd3] transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-2xl border border-warm-200 bg-[#fff8f4] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-white"
               >
-                Cancel
+                {imageFile ? "Choose a different image" : "Choose an image"}
               </button>
-            </Link>
-            <Button type="submit" loading={uploading || createPet.isPending} className="flex-1">
-              Add pet
-            </Button>
+              {imageFile && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    setImagePreview(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="block text-sm font-semibold text-red-500 transition-colors hover:text-red-600"
+                >
+                  Remove photo
+                </button>
+              )}
+            </div>
           </div>
-        </form>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </section>
+
+        <section className="app-panel p-5 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input label="Name *" value={form.name} onChange={(event) => set("name", event.target.value)} placeholder="Milo" required />
+              <Input label="Date of birth" type="date" value={form.dob} onChange={(event) => set("dob", event.target.value)} />
+              <Input label="Breed" value={form.breed} onChange={(event) => set("breed", event.target.value)} placeholder="Labrador" />
+              <Input label="Color" value={form.color} onChange={(event) => set("color", event.target.value)} placeholder="Golden" />
+            </div>
+
+            <Select
+              label="Gender"
+              value={form.gender}
+              onChange={(event) => set("gender", event.target.value)}
+              placeholder="Select gender"
+              options={[
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+                { value: "unknown", label: "Unknown" },
+              ]}
+            />
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</label>
+              <textarea
+                value={form.notes}
+                onChange={(event) => set("notes", event.target.value)}
+                rows={5}
+                placeholder="Add anything useful for future reference."
+                className="w-full rounded-2xl border border-[#eeddd3] bg-[#f6eee9] px-4 py-3.5 text-sm text-gray-800 placeholder-gray-300 outline-none transition-all focus:border-[#ff7a5c] focus:ring-2 focus:ring-[#ff7a5c]/15 resize-none"
+              />
+            </div>
+
+            {error && <InlineError message={error} />}
+
+            <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+              <Link to="/pets" className="sm:min-w-[9rem]">
+                <button
+                  type="button"
+                  className="w-full rounded-2xl border border-[#eeddd3] bg-[#f6eee9] py-3 text-sm font-semibold text-gray-600 transition-colors hover:bg-[#eeddd3]"
+                >
+                  Cancel
+                </button>
+              </Link>
+              <Button type="submit" loading={uploading || createPet.isPending} className="sm:min-w-[12rem]">
+                Create pet profile
+              </Button>
+            </div>
+          </form>
+        </section>
       </div>
     </div>
   );

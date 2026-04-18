@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -14,7 +14,7 @@ const variantClasses: Record<string, string> = {
   ghost: "bg-transparent text-gray-600 hover:bg-[#f6eee9]",
 };
 
-const variantStyles: Record<string, React.CSSProperties> = {
+const variantStyles: Record<string, CSSProperties> = {
   primary: { background: "#ff7a5c", boxShadow: "0 4px 16px rgba(255,122,92,0.3)" },
   secondary: {},
   danger: {},
@@ -23,7 +23,7 @@ const variantStyles: Record<string, React.CSSProperties> = {
 
 const sizeClasses: Record<string, string> = {
   sm: "px-3 py-1.5 text-xs",
-  md: "px-4 py-2 text-sm",
+  md: "px-4 py-2.5 text-sm",
   lg: "px-6 py-3 text-base",
 };
 
@@ -40,7 +40,7 @@ export function Button({
   return (
     <button
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed focus:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff7a5c]/30 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       style={{ ...variantStyles[variant], ...style }}
       {...props}
     >

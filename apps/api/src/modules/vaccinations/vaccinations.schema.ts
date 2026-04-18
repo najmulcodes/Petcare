@@ -7,6 +7,8 @@ export const createVaccinationSchema = z.object({
   administered_at: dateString,
   next_due_at: dateString.optional(),
   notes: z.string().max(1000).optional(),
+  card_image_url: z.string().url().optional(),
+  ocr_text: z.string().max(12000).optional(),
 });
 
 export const updateVaccinationSchema = createVaccinationSchema.partial();

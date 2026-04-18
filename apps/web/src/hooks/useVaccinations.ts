@@ -8,6 +8,8 @@ export interface Vaccination {
   administered_at: string;
   next_due_at: string | null;
   notes: string | null;
+  card_image_url: string | null;
+  ocr_text: string | null;
   created_at: string;
 }
 
@@ -16,6 +18,17 @@ export interface CreateVaccinationInput {
   administered_at: string;
   next_due_at?: string;
   notes?: string;
+  card_image_url?: string;
+  ocr_text?: string;
+}
+
+export interface UpdateVaccinationInput {
+  vaccine_name?: string;
+  administered_at?: string;
+  next_due_at?: string;
+  notes?: string;
+  card_image_url?: string;
+  ocr_text?: string;
 }
 
 async function fetchVaccinations(petId: string): Promise<Vaccination[]> {
@@ -25,6 +38,15 @@ async function fetchVaccinations(petId: string): Promise<Vaccination[]> {
 
 async function createVaccination({ petId, ...input }: CreateVaccinationInput & { petId: string }): Promise<Vaccination> {
   const res = await api.post<{ success: boolean; data: Vaccination }>(`/pets/${petId}/vaccinations`, input);
+  return res.data.data;
+}
+
+async function updateVaccination({
+  petId,
+  id,
+  ...input
+}: UpdateVaccinationInput & { petId: string; id: string }): Promise<Vaccination> {
+  const res = await api.patch<{ success: boolean; data: Vaccination }>(`/pets/${petId}/vaccinations/${id}`, input);
   return res.data.data;
 }
 
@@ -44,6 +66,14 @@ export function useCreateVaccination(petId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateVaccinationInput) => createVaccination({ petId, ...input }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vaccinations", petId] }),
+  });
+}
+
+export function useUpdateVaccination(petId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: UpdateVaccinationInput & { id: string }) => updateVaccination({ petId, id, ...input }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["vaccinations", petId] }),
   });
 }

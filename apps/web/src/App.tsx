@@ -14,6 +14,7 @@ import { EditPetPage } from "./pages/pets/EditPetPage";
 import { PetDetailPage } from "./pages/pets/PetDetailPage";
 import { ExpensesListPage } from "./pages/expenses/ExpensesListPage";
 import { AddExpensePage } from "./pages/expenses/AddExpensePage";
+import { ProfilePage } from "./pages/profile/ProfilePage";
 import { PageSpinner } from "./components/ui/Spinner";
 
 const queryClient = new QueryClient({
@@ -30,7 +31,6 @@ function AppPage({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Redirect logged-in users away from public-only pages
 function PublicOnlyPage({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <PageSpinner />;
@@ -50,6 +50,7 @@ function AppRoutes() {
       <Route path="/pets/:id/edit" element={<AppPage><EditPetPage /></AppPage>} />
       <Route path="/expenses" element={<AppPage><ExpensesListPage /></AppPage>} />
       <Route path="/expenses/add" element={<AppPage><AddExpensePage /></AppPage>} />
+      <Route path="/profile" element={<AppPage><ProfilePage /></AppPage>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
