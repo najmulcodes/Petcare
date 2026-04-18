@@ -35,12 +35,12 @@ const steps = [
 
 export function HomePage() {
   return (
-    <div className="min-h-screen pt-14">
+    <div className="min-h-screen pt-16">
       <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8 lg:py-14">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-3 rounded-full border border-white/80 bg-white/85 px-4 py-2 text-sm font-semibold text-[#8c776f] shadow-sm backdrop-blur-sm">
-              <img src="/paw-icon.svg" className="w-4 h-4" />
+              <img src="/paw.png" className="w-4 h-4" />
               Pet care + expense tracking
             </div>
 
@@ -158,6 +158,14 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-warm-200 bg-white/50 py-8">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <p className="text-center text-sm text-[#8c776f]">
+            © {new Date().getFullYear()} Whisker Diary. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
