@@ -199,7 +199,7 @@ pnpm dev:web
 
 ## 👤 Author
 
-Najmul Hasan (Shariar)
+Najmul Hasan
 Full Stack Developer (MERN)
 
 ---
