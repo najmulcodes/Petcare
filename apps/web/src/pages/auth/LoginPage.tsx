@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { setAccessToken } from "../../lib/api";
@@ -36,6 +36,31 @@ export function LoginPage() {
   const [resetSuccess, setResetSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Mobile panel state — mirrors the Devfolio pattern exactly
+  const [isCompact, setIsCompact] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth <= 1024 : false
+  );
+  const [leftOpen, setLeftOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const compact = window.innerWidth <= 1024;
+      setIsCompact(compact);
+      if (!compact) setLeftOpen(false);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isCompact && leftOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isCompact, leftOpen]);
+
   async function completeSignedInSession(accessToken: string) {
     setAccessToken(accessToken);
     await requestNotificationPermission();
@@ -54,12 +79,10 @@ export function LoginPage() {
           setError("Please enter your name.");
           return;
         }
-
         if (password.length < 6) {
           setError("Password must be at least 6 characters.");
           return;
         }
-
         if (password !== confirmPassword) {
           setError("Passwords do not match.");
           return;
@@ -136,18 +159,15 @@ export function LoginPage() {
       setResetError("Please enter your email address.");
       return;
     }
-
     if (!emailPattern.test(trimmedEmail)) {
       setResetError("Enter a valid email address.");
       return;
     }
 
     setResetLoading(true);
-
     const { error: resetRequestError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
       redirectTo: window.location.origin + "/reset-password",
     });
-
     setResetLoading(false);
 
     if (resetRequestError) {
@@ -163,10 +183,45 @@ export function LoginPage() {
     <div className="min-h-screen pt-20">
       <div className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 xl:px-10">
         <div className="grid gap-6 lg:grid-cols-[minmax(20rem,1.05fr)_minmax(24rem,0.95fr)] lg:items-stretch">
-          <section className="app-panel flex flex-col justify-between overflow-hidden p-6 sm:p-8 lg:p-10">
+
+          {/* ── Backdrop overlay (mobile only) ── */}
+          {isCompact && leftOpen && (
+            <div
+              className="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm"
+              onClick={() => setLeftOpen(false)}
+              aria-hidden="true"
+            />
+          )}
+
+          {/* ── LEFT PANEL ── */}
+          <section
+            className={[
+              "app-panel flex flex-col justify-between overflow-hidden p-6 sm:p-8 lg:p-10",
+              isCompact
+                ? "fixed top-0 left-0 z-[1001] h-dvh w-[min(88vw,360px)] shadow-2xl transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                : "relative",
+              isCompact && !leftOpen ? "-translate-x-full pointer-events-none" : "translate-x-0",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
+            {/* Close button — inside left panel, mobile only */}
+            {isCompact && (
+              <button
+                type="button"
+                onClick={() => setLeftOpen(false)}
+                aria-label="Close preview panel"
+                className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#f1e3da] text-[#5f4d46] text-sm font-semibold transition-colors hover:bg-[#e8d4c8]"
+              >
+                ✕
+              </button>
+            )}
+
             <div className="space-y-5">
+              {/* Back to home — always in left panel */}
               <Link
                 to="/"
+                onClick={() => isCompact && setLeftOpen(false)}
                 className="inline-flex items-center gap-2 text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46]"
               >
                 <span aria-hidden="true">←</span>
@@ -187,17 +242,46 @@ export function LoginPage() {
             <div className="mt-8 space-y-4">
               {highlights.map((highlight) => (
                 <div key={highlight} className="flex items-start gap-3 rounded-2xl bg-[#fff8f4] px-4 py-4">
-                  <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#ff7a5c]" />
+                  <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#ff7a5c]" />
                   <p className="text-sm leading-7 text-[#5f4d46]">{highlight}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="app-panel p-6 sm:p-8 lg:p-10">
-            <div className="mx-auto w-full max-w-xl">
+          {/* ── RIGHT PANEL ── */}
+          <section className="app-panel overflow-hidden">
+
+            {/* ── TOPBAR — utility navigation layer ── */}
+            <div className="flex items-center justify-between border-b border-[#f1e3da] px-6 py-3 sm:px-8 lg:px-10">
+              {/* Back to home — desktop always, mobile always */}
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46]"
+              >
+                <span aria-hidden="true">←</span>
+                Back to home
+              </Link>
+
+              {/* i button — mobile only, when drawer is closed */}
+              {isCompact && !leftOpen && (
+                <button
+                  type="button"
+                  onClick={() => setLeftOpen(true)}
+                  aria-label="Open preview panel"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-[#f1e3da] bg-[#fff8f4] shadow-sm transition-colors hover:border-[#e0c9bc] hover:bg-white"
+                >
+                  <span className="font-serif text-sm font-bold italic leading-none text-[#8c776f]">i</span>
+                </button>
+              )}
+            </div>
+
+            <div className="mx-auto w-full max-w-xl px-6 pt-6 sm:px-8 lg:px-10 pb-6 sm:pb-8 lg:pb-10">
+              {/* ── CONTENT HEADER — main identity layer ── */}
               <div className="mb-6 flex items-center justify-between gap-4">
-                <div>
+
+                {/* Left: label + title */}
+                <div className="flex flex-col">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b28d80]">
                     {verificationEmail ? "Verify email" : view === "signin" ? "Sign in" : "Create account"}
                   </p>
@@ -210,8 +294,9 @@ export function LoginPage() {
                   </h2>
                 </div>
 
+                {/* Right: tab toggle */}
                 {!verificationEmail && (
-                  <div className="rounded-full border border-[#f1e3da] bg-[#fff8f4] p-1">
+                  <div className="rounded-full border border-[#f1e3da] bg-[#fff8f4] p-1 shrink-0">
                     <button
                       type="button"
                       onClick={() => {
@@ -245,8 +330,9 @@ export function LoginPage() {
               {verificationEmail ? (
                 <div className="space-y-5 rounded-[28px] border border-[#f1e3da] bg-[#fff8f4] p-6">
                   <p className="text-sm leading-7 text-[#5f4d46]">
-                    We sent a verification email to <span className="font-semibold text-[#221a16]">{verificationEmail}</span>.
-                    Open it, complete the verification step, and then sign in with your password.
+                    We sent a verification email to{" "}
+                    <span className="font-semibold text-[#221a16]">{verificationEmail}</span>. Open it,
+                    complete the verification step, and then sign in with your password.
                   </p>
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <button
