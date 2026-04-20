@@ -8,11 +8,13 @@ import { Select } from "../../components/ui/Select";
 import { Button } from "../../components/ui/Button";
 import { InlineError } from "../../components/ui/ErrorState";
 import { EntityAvatar } from "../../components/ui/EntityAvatar";
+import { FoodTimeInput } from "../../components/FoodTimeInput";
 
 export function AddPetPage() {
   const navigate = useNavigate();
   const createPet = useCreatePet();
   const [form, setForm] = useState({ name: "", dob: "", breed: "", color: "", gender: "", notes: "" });
+  const [foodTime, setFoodTime] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -66,6 +68,7 @@ export function AddPetPage() {
         gender: (form.gender as "male" | "female" | "unknown") || undefined,
         notes: form.notes || undefined,
         image: imageUrl,
+        food_time: foodTime || null,
       },
       {
         onSuccess: () => navigate("/pets"),
@@ -165,6 +168,8 @@ export function AddPetPage() {
                 { value: "unknown", label: "Unknown" },
               ]}
             />
+
+            <FoodTimeInput value={foodTime} onChange={setFoodTime} />
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</label>

@@ -9,6 +9,7 @@ import { PageSpinner } from "../../components/ui/Spinner";
 import { InlineError, ErrorState } from "../../components/ui/ErrorState";
 import { ImageCropper } from "../../components/ImageCropper";
 import { EntityAvatar } from "../../components/ui/EntityAvatar";
+import { FoodTimeInput } from "../../components/FoodTimeInput";
 
 export function EditPetPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ export function EditPetPage() {
   const { data: pet, isLoading, error } = usePet(id!);
   const updatePet = useUpdatePet();
   const [form, setForm] = useState({ name: "", dob: "", breed: "", color: "", gender: "", notes: "" });
+  const [foodTime, setFoodTime] = useState<string>("");
   const [formError, setFormError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -34,6 +36,8 @@ export function EditPetPage() {
       gender: pet.gender ?? "",
       notes: pet.notes ?? "",
     });
+    // food_time comes back as "HH:MM:SS" from Postgres TIME column — slice to "HH:MM"
+    setFoodTime(pet.food_time ? pet.food_time.slice(0, 5) : "");
     setImagePreview(pet.image ?? null);
   }, [pet]);
 
@@ -89,6 +93,7 @@ export function EditPetPage() {
         gender: (form.gender as "male" | "female" | "unknown") || undefined,
         notes: form.notes || undefined,
         image: imageUrl,
+        food_time: foodTime || null,
       },
       {
         onSuccess: () => navigate(`/pets/${id}`),
@@ -188,6 +193,8 @@ export function EditPetPage() {
                 { value: "unknown", label: "Unknown" },
               ]}
             />
+
+            <FoodTimeInput value={foodTime} onChange={setFoodTime} />
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">Notes</label>

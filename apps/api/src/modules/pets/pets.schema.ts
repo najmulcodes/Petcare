@@ -10,6 +10,11 @@ export const createPetSchema = z.object({
   color: z.string().max(100).optional(),
   gender: z.enum(["male", "female", "unknown"]).optional(),
   notes: z.string().max(2000).optional(),
+  food_time: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "Must be HH:MM")
+    .nullable()
+    .optional(),
 });
 
 export const updatePetSchema = createPetSchema.partial();

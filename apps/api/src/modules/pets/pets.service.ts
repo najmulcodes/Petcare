@@ -38,6 +38,7 @@ export async function createPet(ownerId: string, input: CreatePetInput) {
       color: input.color ?? null,
       gender: input.gender ?? null,
       notes: input.notes ?? null,
+      food_time: input.food_time ?? null,
     })
     .select()
     .single();
@@ -54,6 +55,8 @@ export async function updatePet(petId: string, ownerId: string, input: UpdatePet
   if (input.color !== undefined) patch.color = input.color;
   if (input.gender !== undefined) patch.gender = input.gender;
   if (input.notes !== undefined) patch.notes = input.notes;
+  if (input.food_time !== undefined) patch.food_time = input.food_time;
+
   if (Object.keys(patch).length === 0) throw new AppError(400, "No fields provided to update");
 
   const { data, error } = await supabaseAdmin

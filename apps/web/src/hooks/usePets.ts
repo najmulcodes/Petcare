@@ -11,6 +11,7 @@ export interface Pet {
   gender: "male" | "female" | "unknown" | null;
   notes: string | null;
   image: string | null;   // ← added
+  food_time: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -23,6 +24,7 @@ export interface CreatePetInput {
   gender?: "male" | "female" | "unknown";
   notes?: string;
   image?: string;         // ← added
+  food_time?: string | null;
 }
 
 async function fetchPets(): Promise<Pet[]> {

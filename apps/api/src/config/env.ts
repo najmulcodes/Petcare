@@ -19,6 +19,10 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().default("Whisker Diary <noreply@whiskerdiary.app>"),
   RESEND_API_KEY: z.string().default(""),
   REDIS_URL: z.string().default("redis://localhost:6379"),
+  // VAPID keys for Web Push — generate with: npx web-push generate-vapid-keys
+  VAPID_PUBLIC_KEY: z.string().min(1, "VAPID_PUBLIC_KEY is required for push notifications"),
+  VAPID_PRIVATE_KEY: z.string().min(1, "VAPID_PRIVATE_KEY is required for push notifications"),
+  VAPID_CONTACT_EMAIL: z.string().email().default("noreply@whiskerdiary.app"),
 });
 
 const parsed = envSchema.safeParse(process.env);

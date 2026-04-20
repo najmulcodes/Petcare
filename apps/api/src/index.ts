@@ -3,23 +3,27 @@ import { env } from "./config/env";
 import { verifyEmailConnection } from "./lib/email";
 import { startReminderScheduler } from "./jobs/reminder.scheduler";
 import { startReminderWorker } from "./jobs/reminder.worker";
+import { startFoodReminderScheduler } from "./jobs/food-reminder.scheduler";
+import { startFoodReminderWorker } from "./jobs/food-reminder.worker";
 
 async function main() {
   await verifyEmailConnection();
 
-  const worker = startReminderWorker();
+  const reminderWorker = startReminderWorker();
+  const foodWorker = startFoodReminderWorker();
+
   startReminderScheduler();
+  startFoodReminderScheduler();
 
   const server = app.listen(env.PORT, () => {
     console.log(`✅ API running on port ${env.PORT} [${env.NODE_ENV}]`);
   });
 
-  // Graceful shutdown: close HTTP server, then drain the worker
   async function shutdown(signal: string) {
     console.log(`${signal} received. Shutting down gracefully...`);
     server.close(async () => {
-      await worker.close();
-      console.log("Server and worker closed.");
+      await Promise.all([reminderWorker.close(), foodWorker.close()]);
+      console.log("Server and workers closed.");
       process.exit(0);
     });
   }
