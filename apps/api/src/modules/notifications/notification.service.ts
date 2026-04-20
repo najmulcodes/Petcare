@@ -1,5 +1,7 @@
 import { supabaseAdmin } from "../../lib/supabase";
-import { sendReminderEmail } from "../../lib/email";
+import { reminderQueue } from "../../jobs/reminder.queue";
+
+// --- Types (mirrors your existing interfaces) ---
 
 interface PetRow {
   id: string;
@@ -7,33 +9,26 @@ interface PetRow {
   owner_id: string;
 }
 
-interface UserRow {
-  email: string;
-}
-
 interface MedicationRow {
   id: string;
-  pet_id: string;
   name: string;
   end_date: string | null;
-  is_active: boolean;
   pets: PetRow;
 }
 
 interface VaccinationRow {
   id: string;
-  pet_id: string;
   vaccine_name: string;
   next_due_at: string | null;
   pets: PetRow;
 }
 
-// Returns today's date string in YYYY-MM-DD (UTC)
+// --- Helpers ---
+
 function todayStr(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-// Returns tomorrow's date string in YYYY-MM-DD (UTC)
 function tomorrowStr(): string {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + 1);
@@ -46,15 +41,15 @@ async function getOwnerEmail(ownerId: string): Promise<string | null> {
   return data.user.email;
 }
 
-export async function sendMedicationReminders(): Promise<void> {
+// --- Job enqueuers (replace direct sendReminderEmail calls) ---
+
+async function enqueueMedicationReminders(): Promise<void> {
   const today = todayStr();
   const tomorrow = tomorrowStr();
 
-  // Find active medications whose end_date is today or tomorrow (due soon)
-  // Also include medications with no end date that are active (ongoing)
   const { data: medications, error } = await supabaseAdmin
     .from("medications")
-    .select("id, pet_id, name, end_date, is_active, pets(id, name, owner_id)")
+    .select("id, name, end_date, pets(id, name, owner_id)")
     .eq("is_active", true)
     .or(`end_date.eq.${today},end_date.eq.${tomorrow}`) as {
       data: MedicationRow[] | null;
@@ -70,29 +65,33 @@ export async function sendMedicationReminders(): Promise<void> {
     const ownerEmail = await getOwnerEmail(pet.owner_id);
     if (!ownerEmail) continue;
 
-    try {
-      await sendReminderEmail({
-        to: ownerEmail,
+    // Enqueue instead of sending inline.
+    // BullMQ handles retries — this function just produces jobs.
+    await reminderQueue.add(
+      `medication:${med.id}`,
+      {
+        type: "medication",
+        ownerEmail,
         petName: pet.name,
-        taskType: "medication",
         taskName: med.name,
         dueDate: med.end_date ?? today,
-      });
-      console.log(`[notifications] Medication reminder sent → ${ownerEmail} for ${pet.name} (${med.name})`);
-    } catch (emailErr) {
-      console.error(`[notifications] Failed to send medication reminder:`, emailErr);
-    }
+      },
+      {
+        // Deduplicate: if a job with this name already exists in the queue,
+        // BullMQ won't add it again. Prevents duplicate emails on cron overlap.
+        jobId: `medication:${med.id}:${today}`,
+      }
+    );
   }
 }
 
-export async function sendVaccinationReminders(): Promise<void> {
+async function enqueueVaccinationReminders(): Promise<void> {
   const today = todayStr();
   const tomorrow = tomorrowStr();
 
-  // Find vaccinations due today or tomorrow
   const { data: vaccinations, error } = await supabaseAdmin
     .from("vaccinations")
-    .select("id, pet_id, vaccine_name, next_due_at, pets(id, name, owner_id)")
+    .select("id, vaccine_name, next_due_at, pets(id, name, owner_id)")
     .or(`next_due_at.eq.${today},next_due_at.eq.${tomorrow}`) as {
       data: VaccinationRow[] | null;
       error: unknown;
@@ -107,26 +106,28 @@ export async function sendVaccinationReminders(): Promise<void> {
     const ownerEmail = await getOwnerEmail(pet.owner_id);
     if (!ownerEmail) continue;
 
-    try {
-      await sendReminderEmail({
-        to: ownerEmail,
+    await reminderQueue.add(
+      `vaccination:${vac.id}`,
+      {
+        type: "vaccination",
+        ownerEmail,
         petName: pet.name,
-        taskType: "vaccination",
         taskName: vac.vaccine_name,
         dueDate: vac.next_due_at,
-      });
-      console.log(`[notifications] Vaccination reminder sent → ${ownerEmail} for ${pet.name} (${vac.vaccine_name})`);
-    } catch (emailErr) {
-      console.error(`[notifications] Failed to send vaccination reminder:`, emailErr);
-    }
+      },
+      {
+        jobId: `vaccination:${vac.id}:${today}`,
+      }
+    );
   }
 }
 
-export async function runAllReminders(): Promise<void> {
-  console.log("[notifications] Running reminder check...");
+// Called by the scheduled job (replaces runAllReminders from cron version)
+export async function enqueueAllReminders(): Promise<void> {
+  console.log("[notifications] Enqueueing reminders...");
   await Promise.allSettled([
-    sendMedicationReminders(),
-    sendVaccinationReminders(),
+    enqueueMedicationReminders(),
+    enqueueVaccinationReminders(),
   ]);
-  console.log("[notifications] Reminder check complete.");
+  console.log("[notifications] Done enqueueing.");
 }

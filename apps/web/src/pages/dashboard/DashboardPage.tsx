@@ -6,6 +6,7 @@ import { PageSpinner } from "../../components/ui/Spinner";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { EntityAvatar } from "../../components/ui/EntityAvatar";
 import { getUserAvatarUrl, getUserDisplayName } from "../../lib/user";
+import { DashboardAlerts } from "../../components/DashboardAlerts";
 
 function getMonthString(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -43,12 +44,15 @@ export function DashboardPage() {
   ];
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(21rem,0.95fr)]">
-      <div className="space-y-6">
-        <section
-          className="overflow-hidden rounded-[32px] p-6 text-white shadow-card sm:p-8"
-          style={{ background: "linear-gradient(145deg, #ff8a6f 0%, #ff7a5c 50%, #e76243 100%)" }}
-        >
+    <div className="space-y-6">
+      <DashboardAlerts />
+      
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(21rem,0.95fr)]">
+        <div className="space-y-6">
+          <section
+            className="overflow-hidden rounded-[32px] p-6 text-white shadow-card sm:p-8"
+            style={{ background: "linear-gradient(145deg, #ff8a6f 0%, #ff7a5c 50%, #e76243 100%)" }}
+          >
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/75">Dashboard</p>
@@ -221,6 +225,7 @@ export function DashboardPage() {
           </p>
         </section>
       </aside>
+      </div>
     </div>
   );
 }

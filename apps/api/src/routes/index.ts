@@ -8,6 +8,7 @@ import vaccinationsRouter from "../modules/vaccinations/vaccinations.router";
 import vetVisitsRouter from "../modules/vet-visits/vet-visits.router";
 import petNotesRouter from "../modules/pet-notes/pet-notes.router";
 import petExpensesRouter from "../modules/pet-expenses/pet-expenses.router";
+import healthSummaryRouter from "../modules/health-summary/health-summary.router";
 
 const router = Router();
 
@@ -33,5 +34,6 @@ router.use("/pets/:petId/vaccinations", vaccinationsRouter);
 router.use("/pets/:petId/vet-visits", vetVisitsRouter);
 router.use("/pets/:petId/notes", petNotesRouter);
 router.use("/pets/:petId/expenses", petExpensesRouter);
+router.use("/health-summary", healthSummaryRouter);
 
 export default router;
