@@ -36,7 +36,6 @@ export function LoginPage() {
   const [resetSuccess, setResetSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Mobile panel state — mirrors the Devfolio pattern exactly
   const [isCompact, setIsCompact] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth <= 1024 : false
   );
@@ -53,7 +52,6 @@ export function LoginPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Lock body scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = isCompact && leftOpen ? "hidden" : "";
     return () => {
@@ -180,9 +178,9 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen pt-20">
-      <div className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 xl:px-10">
-        <div className="grid gap-6 lg:grid-cols-[minmax(20rem,1.05fr)_minmax(24rem,0.95fr)] lg:items-stretch">
+    <div className="min-h-screen pt-16">
+      <div className="mx-auto w-full max-w-7xl px-4 pb-4 sm:px-6 lg:px-8 xl:px-10">
+        <div className="grid gap-4 lg:grid-cols-[minmax(20rem,1.05fr)_minmax(24rem,0.95fr)] lg:items-stretch">
 
           {/* ── Backdrop overlay (mobile only) ── */}
           {isCompact && leftOpen && (
@@ -196,7 +194,7 @@ export function LoginPage() {
           {/* ── LEFT PANEL ── */}
           <section
             className={[
-              "app-panel flex flex-col justify-between overflow-hidden p-6 sm:p-8 lg:p-10",
+              "app-panel flex flex-col justify-between overflow-hidden p-5 sm:p-7 lg:p-8",
               isCompact
                 ? "fixed top-0 left-0 z-[1001] h-dvh w-[min(88vw,360px)] shadow-2xl transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                 : "relative",
@@ -205,7 +203,6 @@ export function LoginPage() {
               .filter(Boolean)
               .join(" ")}
           >
-            {/* Close button — inside left panel, mobile only */}
             {isCompact && (
               <button
                 type="button"
@@ -217,8 +214,7 @@ export function LoginPage() {
               </button>
             )}
 
-            <div className="space-y-5">
-              {/* Back to home — always in left panel */}
+            <div className="space-y-4">
               <Link
                 to="/"
                 onClick={() => isCompact && setLeftOpen(false)}
@@ -228,22 +224,22 @@ export function LoginPage() {
                 Back to home
               </Link>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="app-chip">Whisker Diary</div>
-                <h1 className="font-display text-4xl font-semibold leading-tight text-[#221a16] sm:text-5xl">
+                <h1 className="font-display text-3xl font-semibold leading-tight text-[#221a16] sm:text-4xl">
                   Sign in to your pet care workspace
                 </h1>
-                <p className="max-w-xl text-base leading-8 text-[#7e6d66]">
+                <p className="max-w-xl text-sm leading-7 text-[#7e6d66]">
                   Access your pet profiles, care reminders, and spending history from one calm, organized dashboard.
                 </p>
               </div>
             </div>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-6 space-y-3">
               {highlights.map((highlight) => (
-                <div key={highlight} className="flex items-start gap-3 rounded-2xl bg-[#fff8f4] px-4 py-4">
-                  <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#ff7a5c]" />
-                  <p className="text-sm leading-7 text-[#5f4d46]">{highlight}</p>
+                <div key={highlight} className="flex items-start gap-3 rounded-2xl bg-[#fff8f4] px-4 py-3">
+                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#ff7a5c]" />
+                  <p className="text-sm leading-6 text-[#5f4d46]">{highlight}</p>
                 </div>
               ))}
             </div>
@@ -252,18 +248,16 @@ export function LoginPage() {
           {/* ── RIGHT PANEL ── */}
           <section className="app-panel overflow-hidden">
 
-            {/* ── TOPBAR — utility navigation layer ── */}
-            <div className="flex items-center justify-between border-b border-[#f1e3da] px-6 py-3 sm:px-8 lg:px-10">
-              {/* Back to home — desktop always, mobile always */}
+            {/* ── TOPBAR ── */}
+            <div className="flex items-center justify-between border-b border-[#f1e3da] px-5 py-2.5 sm:px-7 lg:px-8">
               <Link
                 to="/"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46]"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#8c776f] transition-colors hover:text-[#5f4d46] lg:hidden"
               >
                 <span aria-hidden="true">←</span>
                 Back to home
               </Link>
 
-              {/* i button — mobile only, when drawer is closed */}
               {isCompact && !leftOpen && (
                 <button
                   type="button"
@@ -276,16 +270,15 @@ export function LoginPage() {
               )}
             </div>
 
-            <div className="mx-auto w-full max-w-xl px-6 pt-6 sm:px-8 lg:px-10 pb-6 sm:pb-8 lg:pb-10">
-              {/* ── CONTENT HEADER — main identity layer ── */}
-              <div className="mb-6 flex items-center justify-between gap-4">
+            <div className="mx-auto w-full max-w-xl px-5 pt-6 sm:px-7 lg:px-8 pb-5 sm:pb-7 lg:pb-8">
 
-                {/* Left: label + title */}
+              {/* ── CONTENT HEADER ── */}
+              <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex flex-col">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b28d80]">
                     {verificationEmail ? "Verify email" : view === "signin" ? "Sign in" : "Create account"}
                   </p>
-                  <h2 className="mt-2 text-3xl font-semibold text-[#221a16]">
+                  <h2 className="mt-1 text-2xl font-semibold text-[#221a16]">
                     {verificationEmail
                       ? "Finish verifying your email"
                       : view === "signin"
@@ -294,7 +287,6 @@ export function LoginPage() {
                   </h2>
                 </div>
 
-                {/* Right: tab toggle */}
                 {!verificationEmail && (
                   <div className="rounded-full border border-[#f1e3da] bg-[#fff8f4] p-1 shrink-0">
                     <button
@@ -304,7 +296,7 @@ export function LoginPage() {
                         setError(null);
                         setVerificationEmail(null);
                       }}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                      className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors ${
                         view === "signin" ? "bg-white text-[#221a16] shadow-sm" : "text-[#8c776f]"
                       }`}
                     >
@@ -317,7 +309,7 @@ export function LoginPage() {
                         setError(null);
                         setVerificationEmail(null);
                       }}
-                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                      className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors ${
                         view === "signup" ? "bg-white text-[#221a16] shadow-sm" : "text-[#8c776f]"
                       }`}
                     >
@@ -328,27 +320,27 @@ export function LoginPage() {
               </div>
 
               {verificationEmail ? (
-                <div className="space-y-5 rounded-[28px] border border-[#f1e3da] bg-[#fff8f4] p-6">
-                  <p className="text-sm leading-7 text-[#5f4d46]">
+                <div className="space-y-4 rounded-[28px] border border-[#f1e3da] bg-[#fff8f4] p-5">
+                  <p className="text-sm leading-6 text-[#5f4d46]">
                     We sent a verification email to{" "}
                     <span className="font-semibold text-[#221a16]">{verificationEmail}</span>. Open it,
                     complete the verification step, and then sign in with your password.
                   </p>
-                  <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex flex-col gap-2.5 sm:flex-row">
                     <button
                       type="button"
                       onClick={() => {
                         setVerificationEmail(null);
                         setError(null);
                       }}
-                      className="rounded-2xl border border-warm-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-[#fffdfb]"
+                      className="rounded-2xl border border-warm-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-[#fffdfb]"
                     >
                       Use a different email
                     </button>
                     <button
                       type="button"
                       onClick={() => setVerificationEmail(null)}
-                      className="rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.01]"
+                      className="rounded-2xl px-4 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.01]"
                       style={{ background: "#ff7a5c" }}
                     >
                       Back to sign in
@@ -357,13 +349,13 @@ export function LoginPage() {
                 </div>
               ) : (
                 <>
-                  <p className="mb-6 max-w-xl text-sm leading-7 text-[#7e6d66]">
+                  <p className="mb-4 max-w-xl text-sm leading-6 text-[#7e6d66]">
                     {view === "signin"
                       ? "Use your email and password to continue where you left off."
                       : "Create your account with your name, email, and password. We will ask you to verify your email before you continue."}
                   </p>
 
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-3">
                     {view === "signup" && (
                       <Input
                         label="Name"
@@ -422,8 +414,8 @@ export function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full rounded-2xl py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.01] disabled:opacity-50"
-                      style={{ background: "#ff7a5c", boxShadow: "0 16px 30px rgba(255, 122, 92, 0.22)" }}
+                      className="w-full rounded-2xl py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.01] disabled:opacity-50"
+                      style={{ background: "#ff7a5c", boxShadow: "0 12px 24px rgba(255, 122, 92, 0.20)" }}
                     >
                       {loading
                         ? "Please wait..."
@@ -433,7 +425,7 @@ export function LoginPage() {
                     </button>
                   </form>
 
-                  <div className="my-5 flex items-center gap-3">
+                  <div className="my-4 flex items-center gap-3">
                     <div className="h-px flex-1 bg-[#ead9cf]" />
                     <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#b28d80]">or</span>
                     <div className="h-px flex-1 bg-[#ead9cf]" />
@@ -442,7 +434,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={handleGoogle}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-[#ead9cf] bg-[#fff8f4] py-3.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-white"
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl border border-[#ead9cf] bg-[#fff8f4] py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-white"
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
