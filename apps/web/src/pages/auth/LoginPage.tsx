@@ -194,7 +194,7 @@ export function LoginPage() {
           {/* ── LEFT PANEL ── */}
           <section
             className={[
-              "app-panel flex flex-col justify-between overflow-hidden p-5 sm:p-7 lg:p-8",
+              "app-panel flex flex-col justify-start overflow-hidden p-5 sm:p-7 lg:p-8",
               isCompact
                 ? "fixed top-0 left-0 z-[1001] h-dvh w-[min(88vw,360px)] shadow-2xl transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                 : "relative",
@@ -235,7 +235,7 @@ export function LoginPage() {
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-8 space-y-3">
               {highlights.map((highlight) => (
                 <div key={highlight} className="flex items-start gap-3 rounded-2xl bg-[#fff8f4] px-4 py-3">
                   <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#ff7a5c]" />
