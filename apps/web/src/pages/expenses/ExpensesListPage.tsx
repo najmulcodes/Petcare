@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { ErrorState } from "../../components/ui/ErrorState";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 
 function getMonthString(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -30,7 +31,16 @@ export function ExpensesListPage() {
   const { data: expenses, isLoading, error, refetch } = useExpenses(month);
   const deleteExpense = useDeleteExpense();
 
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
   const total = expenses?.reduce((sum, e) => sum + Number(e.amount_bdt), 0) ?? 0;
+
+  function handleDeleteConfirm() {
+    if (!pendingDeleteId) return;
+    deleteExpense.mutate(pendingDeleteId, {
+      onSettled: () => setPendingDeleteId(null),
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -98,7 +108,7 @@ export function ExpensesListPage() {
                 <div className="ml-4 flex items-center gap-3">
                   <span className="text-sm font-semibold text-gray-900">{formatBDT(Number(expense.amount_bdt))}</span>
                   <button
-                    onClick={() => { if (confirm("Delete this expense?")) deleteExpense.mutate(expense.id); }}
+                    onClick={() => setPendingDeleteId(expense.id)}
                     className="text-xs text-red-400 hover:text-red-600"
                   >
                     ✕
@@ -109,6 +119,16 @@ export function ExpensesListPage() {
           </ul>
         )}
       </Card>
+
+      <ConfirmModal
+        open={!!pendingDeleteId}
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete expense"
+        message="This expense will be permanently removed. This cannot be undone."
+        confirmLabel="Delete expense"
+        loading={deleteExpense.isPending}
+      />
     </div>
   );
 }

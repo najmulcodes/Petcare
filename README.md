@@ -193,7 +193,7 @@ pnpm dev:web   # starts Vite on :5173
 ## Author
 
 **Najmul Hasan** — Full Stack Developer  
-[GitHub](https://github.com/yourname) · [LinkedIn](https://linkedin.com/in/yourname)
+[GitHub](https://github.com/najmulcodes) · [LinkedIn](https://linkedin.com/in/najmulcodes)
 
 ---
 

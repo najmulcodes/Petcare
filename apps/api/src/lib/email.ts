@@ -3,6 +3,15 @@ import { env } from "../config/env";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export interface ReminderEmailOptions {
   to: string;
   petName: string;
@@ -15,6 +24,10 @@ export interface ReminderEmailOptions {
 function buildReminderHtml(opts: ReminderEmailOptions): string {
   const emoji = opts.taskType === "medication" ? "💊" : "💉";
   const label = opts.taskType === "medication" ? "Medication" : "Vaccination";
+  const safePetName = escapeHtml(opts.petName);
+  const safeTaskName = escapeHtml(opts.taskName);
+  const safeDueDate = escapeHtml(opts.dueDate);
+  const safeNotes = opts.notes ? escapeHtml(opts.notes) : null;
 
   return `
 <!DOCTYPE html>
@@ -43,12 +56,12 @@ function buildReminderHtml(opts: ReminderEmailOptions): string {
     <div class="header">
       <div class="icon">🐾</div>
       <h1>Whisker Diary Reminder</h1>
-      <p>A care task is coming up for <strong>${opts.petName}</strong></p>
+      <p>A care task is coming up for <strong>${safePetName}</strong></p>
     </div>
     <div>
       <div class="detail-row">
         <span class="detail-label">Pet</span>
-        <span class="detail-value">${opts.petName}</span>
+        <span class="detail-value">${safePetName}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Type</span>
@@ -56,14 +69,14 @@ function buildReminderHtml(opts: ReminderEmailOptions): string {
       </div>
       <div class="detail-row">
         <span class="detail-label">${label}</span>
-        <span class="detail-value">${opts.taskName}</span>
+        <span class="detail-value">${safeTaskName}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Due Date</span>
-        <span class="detail-value">${opts.dueDate}</span>
+        <span class="detail-value">${safeDueDate}</span>
       </div>
     </div>
-    ${opts.notes ? `<div class="notes-box">📝 <strong>Notes:</strong> ${opts.notes}</div>` : ""}
+    ${safeNotes ? `<div class="notes-box">📝 <strong>Notes:</strong> ${safeNotes}</div>` : ""}
     <div class="footer">Sent by Whisker Diary · Your pet care companion</div>
   </div>
 </body>

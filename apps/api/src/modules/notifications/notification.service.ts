@@ -41,6 +41,24 @@ async function getOwnerEmail(ownerId: string): Promise<string | null> {
   return data.user.email;
 }
 
+/**
+ * Resolves emails for a set of owner IDs in parallel.
+ * One Supabase Auth call per unique owner, not per record.
+ */
+async function batchGetOwnerEmails(ownerIds: string[]): Promise<Map<string, string>> {
+  const unique = [...new Set(ownerIds)];
+  const emailMap = new Map<string, string>();
+
+  await Promise.all(
+    unique.map(async (id) => {
+      const email = await getOwnerEmail(id);
+      if (email) emailMap.set(id, email);
+    })
+  );
+
+  return emailMap;
+}
+
 // --- Job enqueuers (replace direct sendReminderEmail calls) ---
 
 async function enqueueMedicationReminders(): Promise<void> {
@@ -58,11 +76,13 @@ async function enqueueMedicationReminders(): Promise<void> {
 
   if (error || !medications) return;
 
+  const emailMap = await batchGetOwnerEmails(medications.map((m) => m.pets?.owner_id).filter(Boolean) as string[]);
+
   for (const med of medications) {
     const pet = med.pets;
     if (!pet) continue;
 
-    const ownerEmail = await getOwnerEmail(pet.owner_id);
+    const ownerEmail = emailMap.get(pet.owner_id);
     if (!ownerEmail) continue;
 
     // Enqueue instead of sending inline.
@@ -99,11 +119,13 @@ async function enqueueVaccinationReminders(): Promise<void> {
 
   if (error || !vaccinations) return;
 
+  const emailMap = await batchGetOwnerEmails(vaccinations.map((v) => v.pets?.owner_id).filter(Boolean) as string[]);
+
   for (const vac of vaccinations) {
     const pet = vac.pets;
     if (!pet || !vac.next_due_at) continue;
 
-    const ownerEmail = await getOwnerEmail(pet.owner_id);
+    const ownerEmail = emailMap.get(pet.owner_id);
     if (!ownerEmail) continue;
 
     await reminderQueue.add(

@@ -29,6 +29,27 @@ export interface HealthSummary {
   totalAlerts: number;
 }
 
+// Supabase join shapes — mirrors what the select() queries actually return
+interface PetJoin {
+  id: string;
+  name: string;
+  owner_id: string;
+}
+
+interface MedicationWithPet {
+  id: string;
+  name: string;
+  end_date: string | null;
+  pets: PetJoin;
+}
+
+interface VaccinationWithPet {
+  id: string;
+  vaccine_name: string;
+  next_due_at: string | null;
+  pets: PetJoin;
+}
+
 // --- Helpers ---
 
 function daysBetween(from: Date, to: Date): number {
@@ -58,13 +79,13 @@ export async function getHealthSummary(ownerId: string): Promise<HealthSummary> 
       .select("id, name, end_date, pets!inner(id, name, owner_id)")
       .eq("pets.owner_id", ownerId)
       .eq("is_active", true)
-      .not("end_date", "is", null),
+      .not("end_date", "is", null) as unknown as Promise<{ data: MedicationWithPet[] | null; error: unknown }>,
 
     supabaseAdmin
       .from("vaccinations")
       .select("id, vaccine_name, next_due_at, pets!inner(id, name, owner_id)")
       .eq("pets.owner_id", ownerId)
-      .not("next_due_at", "is", null),
+      .not("next_due_at", "is", null) as unknown as Promise<{ data: VaccinationWithPet[] | null; error: unknown }>,
   ]);
 
   const alerts: HealthAlert[] = [];
@@ -73,7 +94,7 @@ export async function getHealthSummary(ownerId: string): Promise<HealthSummary> 
 
   // Process medications
   for (const med of (medsResult.data ?? [])) {
-    const pet = (med as any).pets;
+    const pet = med.pets;
     if (!pet || !med.end_date) continue;
     const status = classifyAlert(med.end_date);
     if (!status) continue;
@@ -91,7 +112,7 @@ export async function getHealthSummary(ownerId: string): Promise<HealthSummary> 
 
   // Process vaccinations
   for (const vac of (vacsResult.data ?? [])) {
-    const pet = (vac as any).pets;
+    const pet = vac.pets;
     if (!pet || !vac.next_due_at) continue;
     const status = classifyAlert(vac.next_due_at);
     if (!status) continue;

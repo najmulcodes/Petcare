@@ -22,6 +22,12 @@ export function errorHandler(
     return;
   }
 
+  // CORS rejections come through as plain Errors from the cors() callback
+  if (err instanceof Error && err.message.includes("not allowed by CORS")) {
+    res.status(403).json({ success: false, error: "Forbidden: CORS policy" });
+    return;
+  }
+
   console.error("Unhandled error:", err);
 
   res.status(500).json({

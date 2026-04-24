@@ -87,6 +87,7 @@ create index if not exists vaccinations_pet_idx on vaccinations(pet_id);
 create index if not exists vaccinations_next_due_idx on vaccinations(next_due_at);
 
 alter table if exists pets add column if not exists image text;
+alter table if exists pets add column if not exists food_time time;
 alter table if exists vaccinations add column if not exists card_image_url text;
 alter table if exists vaccinations add column if not exists ocr_text text;
 

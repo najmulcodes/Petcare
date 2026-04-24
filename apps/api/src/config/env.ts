@@ -20,8 +20,9 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().default(""),
   REDIS_URL: z.string().default("redis://localhost:6379"),
   // VAPID keys for Web Push — generate with: npx web-push generate-vapid-keys
-  VAPID_PUBLIC_KEY: z.string().min(1, "VAPID_PUBLIC_KEY is required for push notifications"),
-  VAPID_PRIVATE_KEY: z.string().min(1, "VAPID_PRIVATE_KEY is required for push notifications"),
+  // Optional: server starts without them; push notification endpoints will return 503
+  VAPID_PUBLIC_KEY: z.string().default(""),
+  VAPID_PRIVATE_KEY: z.string().default(""),
   VAPID_CONTACT_EMAIL: z.string().email().default("noreply@whiskerdiary.app"),
 });
 

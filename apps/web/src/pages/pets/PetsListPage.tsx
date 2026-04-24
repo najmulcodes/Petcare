@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { usePets, useDeletePet } from "../../hooks/usePets";
 import { PageSpinner } from "../../components/ui/Spinner";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { EntityAvatar } from "../../components/ui/EntityAvatar";
+import { ConfirmModal } from "../../components/ui/ConfirmModal";
 
 function calcAge(dob: string | null): string {
   if (!dob) return "Unknown age";
@@ -23,8 +25,17 @@ export function PetsListPage() {
   const { data: pets, isLoading, error, refetch } = usePets();
   const deletePet = useDeletePet();
 
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+
   if (isLoading) return <PageSpinner />;
   if (error) return <ErrorState message="Failed to load pets." onRetry={() => refetch()} />;
+
+  function handleDeleteConfirm() {
+    if (!pendingDelete) return;
+    deletePet.mutate(pendingDelete.id, {
+      onSettled: () => setPendingDelete(null),
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -116,12 +127,8 @@ export function PetsListPage() {
 
               <button
                 className="mt-3 inline-flex text-sm font-semibold text-red-500 transition-colors hover:text-red-600 disabled:opacity-50"
-                disabled={deletePet.isPending}
-                onClick={() => {
-                  if (confirm(`Delete ${pet.name}? This cannot be undone.`)) {
-                    deletePet.mutate(pet.id);
-                  }
-                }}
+                disabled={deletePet.isPending && pendingDelete?.id === pet.id}
+                onClick={() => setPendingDelete({ id: pet.id, name: pet.name })}
               >
                 Delete profile
               </button>
@@ -129,6 +136,16 @@ export function PetsListPage() {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        title={`Delete ${pendingDelete?.name ?? "pet"}?`}
+        message={`All records, photos, medications, and history for ${pendingDelete?.name ?? "this pet"} will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Yes, delete"
+        loading={deletePet.isPending}
+      />
     </div>
   );
 }

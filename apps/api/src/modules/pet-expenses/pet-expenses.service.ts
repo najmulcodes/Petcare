@@ -2,15 +2,7 @@ import { supabaseAdmin } from "../../lib/supabase";
 import { AppError } from "../../middleware/errorHandler";
 import { assertPetOwnership } from "../../helpers/assertOwnership";
 import { CreatePetExpenseInput, UpdatePetExpenseInput, PetExpenseQueryInput } from "./pet-expenses.schema";
-
-function buildMonthRange(month: string): { from: string; to: string } {
-  const [year, m] = month.split("-").map(Number);
-  const from = `${month}-01`;
-  const nextMonth = m === 12 ? 1 : m + 1;
-  const nextYear = m === 12 ? year + 1 : year;
-  const to = `${String(nextYear).padStart(4, "0")}-${String(nextMonth).padStart(2, "0")}-01`;
-  return { from, to };
-}
+import { buildMonthRange } from "../../helpers/dateUtils";
 
 export async function getPetExpenses(petId: string, ownerId: string, query: PetExpenseQueryInput) {
   await assertPetOwnership(petId, ownerId);

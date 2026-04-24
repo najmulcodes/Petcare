@@ -1,32 +1,44 @@
 import { Router } from "express";
+import { z } from "zod";
 import { requireAuth } from "../../middleware/auth";
+import { validateBody } from "../../middleware/validate";
 import { supabaseAdmin } from "../../lib/supabase";
 import { env } from "../../config/env";
 
 const router = Router();
 router.use(requireAuth);
 
+const subscribeSchema = z.object({
+  endpoint: z.string().url("endpoint must be a valid URL"),
+  keys: z.object({
+    p256dh: z.string().min(1, "p256dh is required"),
+    auth: z.string().min(1, "auth is required"),
+  }),
+});
+
+const unsubscribeSchema = z.object({
+  endpoint: z.string().url("endpoint must be a valid URL"),
+});
+
 // GET /api/v1/push/vapid-public-key
-// Frontend needs this to create a PushSubscription
 router.get("/vapid-public-key", (_req, res) => {
+  if (!env.VAPID_PUBLIC_KEY) {
+    res.status(503).json({ success: false, error: "Push notifications are not configured" });
+    return;
+  }
   res.json({ success: true, data: { publicKey: env.VAPID_PUBLIC_KEY } });
 });
 
 // POST /api/v1/push/subscribe
-// Body: { endpoint, keys: { p256dh, auth } }
-router.post("/subscribe", async (req, res, next) => {
+router.post("/subscribe", validateBody(subscribeSchema), async (req, res, next) => {
   try {
-    const { endpoint, keys } = req.body as {
-      endpoint: string;
-      keys: { p256dh: string; auth: string };
-    };
-
-    if (!endpoint || !keys?.p256dh || !keys?.auth) {
-      res.status(400).json({ success: false, error: "Invalid subscription object" });
+    if (!env.VAPID_PUBLIC_KEY) {
+      res.status(503).json({ success: false, error: "Push notifications are not configured" });
       return;
     }
 
-    // Upsert — if the user re-subscribes (e.g. after clearing browser data), update the keys
+    const { endpoint, keys } = req.body as z.infer<typeof subscribeSchema>;
+
     const { error } = await supabaseAdmin.from("push_subscriptions").upsert(
       {
         owner_id: req.user.id,
@@ -38,7 +50,6 @@ router.post("/subscribe", async (req, res, next) => {
     );
 
     if (error) throw error;
-
     res.json({ success: true });
   } catch (err) {
     next(err);
@@ -46,15 +57,9 @@ router.post("/subscribe", async (req, res, next) => {
 });
 
 // DELETE /api/v1/push/unsubscribe
-// Body: { endpoint }
-router.delete("/unsubscribe", async (req, res, next) => {
+router.delete("/unsubscribe", validateBody(unsubscribeSchema), async (req, res, next) => {
   try {
-    const { endpoint } = req.body as { endpoint: string };
-
-    if (!endpoint) {
-      res.status(400).json({ success: false, error: "endpoint is required" });
-      return;
-    }
+    const { endpoint } = req.body as z.infer<typeof unsubscribeSchema>;
 
     await supabaseAdmin
       .from("push_subscriptions")

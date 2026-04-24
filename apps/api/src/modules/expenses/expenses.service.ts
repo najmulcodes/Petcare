@@ -1,15 +1,7 @@
 import { supabaseAdmin } from "../../lib/supabase";
 import { AppError } from "../../middleware/errorHandler";
 import { CreateExpenseInput, UpdateExpenseInput, ExpenseQueryInput } from "./expenses.schema";
-
-function buildMonthRange(month: string): { from: string; to: string } {
-  const [year, m] = month.split("-").map(Number);
-  const from = `${month}-01`;
-  const nextMonth = m === 12 ? 1 : m + 1;
-  const nextYear = m === 12 ? year + 1 : year;
-  const to = `${String(nextYear).padStart(4, "0")}-${String(nextMonth).padStart(2, "0")}-01`;
-  return { from, to };
-}
+import { buildMonthRange } from "../../helpers/dateUtils";
 
 const EXPENSE_SELECT = `
   id, date, amount_bdt, description, created_at,

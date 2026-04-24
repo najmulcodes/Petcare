@@ -13,7 +13,7 @@ app.use(
       if (env.ALLOWED_ORIGINS.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, false);
+        callback(new Error(`Origin '${origin}' not allowed by CORS`));
       }
     },
     credentials: true,
